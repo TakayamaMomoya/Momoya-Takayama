@@ -1,0 +1,49 @@
+#====================================================================
+#
+# ３Dアニメーションエフェクト[animEffect3D.txt]
+# Author：Momoya Takayama
+#
+#====================================================================
+SCRIPT
+
+EFFECTSET		#0 爆発
+	PATH = data\TEXTURE\EFFECT\explosion00.png
+	NUM_ANIM = 8
+	SPEED_ANIM = 3
+	COL = 1.0 1.0 1.0 1.0
+	IS_ADD = 0
+END_EFFECTSET
+
+EFFECTSET		#1 火花
+	PATH = data\TEXTURE\EFFECT\flash00.png
+	NUM_ANIM = 4
+	SPEED_ANIM = 2
+	COL = 1.0 0.9 0.70 1.00
+	IS_ADD = 0
+END_EFFECTSET
+
+EFFECTSET		#2 ジャンプ
+	PATH = data\TEXTURE\EFFECT\jump00.png
+	NUM_ANIM = 6
+	SPEED_ANIM = 2
+	COL = 1.0 1.0 1.0 1.0
+	IS_ADD = 0
+END_EFFECTSET
+
+EFFECTSET		#3 弾き
+	PATH = data\TEXTURE\EFFECT\slash00.png
+	NUM_ANIM = 8
+	SPEED_ANIM = 1
+	COL = 1.0 0.8 0.70 1.00
+	IS_ADD = 0
+END_EFFECTSET
+
+EFFECTSET		#4 ジャンプ斬りのエフェクト
+	PATH = data\TEXTURE\EFFECT\slash01.png
+	NUM_ANIM = 11
+	SPEED_ANIM = 2
+	COL = 1.0 1.0 1.0 1.0
+	IS_ADD = 0
+END_EFFECTSET
+
+END_SCRIPT

@@ -1,0 +1,54 @@
+#====================================================================
+#
+# パーティクルスクリプトファイル[particle.txt]
+# Author：Momoya Takayama
+#
+#====================================================================
+SCRIPT
+
+PARTICLESET		#1 爆発のパーティクル
+    LIFE_PARTICLE = 1
+    NUM_EFFECT = 114
+    LIFE_EFFECT = 61
+    RADIUS_EFFECT = 10.33
+    SPEED_EFFECT = 6.03
+    GRAVITY = -0.00
+    DECREASE = -1.11
+    RANGEROT = 0.07
+    IS_ADD = 1
+    IS_ROT = 0
+    IS_TURN = 0
+    COLOR = 0.73 0.26 0.10 1.00
+END_PARTICLESET
+
+PARTICLESET		#2 火花のパーティクル
+    LIFE_PARTICLE = 0
+    NUM_EFFECT = 26
+    LIFE_EFFECT = 5
+    RADIUS_EFFECT = 0.83
+    SPEED_EFFECT = 2.19
+    GRAVITY = -0.00
+    DECREASE = -0.10
+    RANGEROT = 0.07
+    IS_ADD = 1
+    IS_ROT = 0
+    IS_TURN = 0
+    COLOR = 0.73 0.26 0.10 1.00
+END_PARTICLESET
+
+PARTICLESET		#3 爆発前のパーティクル
+    LIFE_PARTICLE = 180
+    NUM_EFFECT = 26
+    LIFE_EFFECT = 59
+    RADIUS_EFFECT = 6.35
+    SPEED_EFFECT = 5.43
+    GRAVITY = -0.00
+    DECREASE = -0.10
+    RANGEROT = 0.07
+    IS_ADD = 1
+    IS_ROT = 0
+    IS_TURN = 0
+    COLOR = 0.73 0.26 0.10 1.00
+END_PARTICLESET
+
+END_SCRIPT

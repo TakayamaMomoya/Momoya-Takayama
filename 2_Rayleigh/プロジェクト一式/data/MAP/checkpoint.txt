@@ -1,0 +1,29 @@
+#==============================================================================
+#
+# チェックポイントの配置 [checkpoint.txt]
+# Author : 髙山桃也
+#
+#==============================================================================
+NUM_CHECKPOINT = 5
+
+CHECKPOINTSET	# 最初期スポーン地点
+	POS = 10.0 -16.9 0.0
+END_CHECKPOINTSET
+
+CHECKPOINTSET	# 1番目のチェックポイント
+	POS = 606.92 48.58 0.0
+END_CHECKPOINTSET
+
+CHECKPOINTSET	# 2番目のチェックポイント
+	POS = 1229.92 39.06 0.0
+END_CHECKPOINTSET
+
+CHECKPOINTSET	# 3番目のチェックポイント
+	POS = 1589.72 250.56 0.0
+END_CHECKPOINTSET
+
+CHECKPOINTSET	# 4番目のチェックポイント
+	POS = 2599.22 180.56 0.0
+END_CHECKPOINTSET
+
+END_SCRIPT		# この行は絶対消さないこと！

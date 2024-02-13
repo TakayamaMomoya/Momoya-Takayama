@@ -1,0 +1,113 @@
+#====================================================================
+#
+# プレイヤー情報ファイル[player.txt]
+# Author：Momoya Takayama
+#
+#====================================================================
+SCRIPT
+
+#====================================================================
+# パラメーター
+#====================================================================
+LIFE = 50	# 初期体力
+TIME_DASH = 10	# ダッシュのクールタイム
+SPEED_DASH = 10.0	# ダッシュの速度
+JUMP_POW = 2.5f	# ジャンプ力
+TIME_DAMAGE = 30	# ダメージ状態の時間
+
+#====================================================================
+# 攻撃判定
+#====================================================================
+NUM_ATTACK = 9
+
+ATTACKSET
+	MOTION = 4
+	PARENT = 8
+	POS = 0.0 7.0 -25.0
+	KEY = 1
+	FRAME = 4
+	RADIUS = 10.0
+END_ATTACKSET
+
+ATTACKSET
+	MOTION = 4
+	PARENT = 8
+	POS = 0.0 7.0 0.0
+	KEY = 1
+	FRAME = 4
+	RADIUS = 5.0
+END_ATTACKSET
+
+ATTACKSET
+	MOTION = 5
+	PARENT = 8
+	POS = 0.0 7.0 -25.0
+	KEY = 1
+	FRAME = 4
+	RADIUS = 10.0
+END_ATTACKSET
+
+ATTACKSET
+	MOTION = 5
+	PARENT = 8
+	POS = 0.0 7.0 0.0
+	KEY = 1
+	FRAME = 4
+	RADIUS = 5.0
+END_ATTACKSET
+
+ATTACKSET
+	MOTION = 6
+	PARENT = 0
+	POS = 0.0 0.0 0.0
+	KEY = 0
+	FRAME = 5
+	RADIUS = 20.0
+END_ATTACKSET
+
+ATTACKSET
+	MOTION = 8
+	PARENT = 0
+	POS = 0.0 7.0 0.0
+	KEY = 0
+	FRAME = 0
+	RADIUS = 20.0
+END_ATTACKSET
+
+ATTACKSET
+	MOTION = 8
+	PARENT = 0
+	POS = 0.0 0.0 0.0
+	KEY = 0
+	FRAME = 3
+	RADIUS = 10.0
+END_ATTACKSET
+
+ATTACKSET
+	MOTION = 8
+	PARENT = 0
+	POS = 0.0 0.0 0.0
+	KEY = 1
+	FRAME = 5
+	RADIUS = 10.0
+END_ATTACKSET
+
+ATTACKSET
+	MOTION = 8
+	PARENT = 0
+	POS = 0.0 0.0 0.0
+	KEY = 2
+	FRAME = 5
+	RADIUS = 10.0
+END_ATTACKSET
+
+#====================================================================
+# パリィのオフセット位置
+#====================================================================
+PARRYSET
+	POS = 0.0 7.0 -15.0
+	RADIUS = 7.0
+	TIME = 10
+END_PARRYSET
+
+END_SCRIPT
