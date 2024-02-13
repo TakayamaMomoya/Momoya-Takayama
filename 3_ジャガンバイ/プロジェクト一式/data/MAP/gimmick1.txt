@@ -1,0 +1,244 @@
+#====================================================================
+#
+# ギミック配置情報[gimmick.txt]
+# Author：Momoya Takayama
+#
+#====================================================================
+
+#====================================================================
+# 扉の設定
+#====================================================================
+DOORSET	#左下
+	POS = -440.0 0.0 -270.0
+	ROT = 0.0 0.0 0.0
+	ROTDEST = -90.0
+END_DOORSET
+
+DOORSET
+	POS = -354.0 0.0 -270.0
+	ROT = 0.0 180.0 0.0
+	ROTDEST = -90.0
+END_DOORSET
+
+DOORSET
+	POS = -288.0 0.0 -359.0
+	ROT = 0.0 90.0 0.0
+	ROTDEST = 0.0
+END_DOORSET
+
+DOORSET
+	POS = -288.0 0.0 -445.0
+	ROT = 0.0 -90.0 0.0
+	ROTDEST = 0.0
+END_DOORSET
+
+DOORSET	#右下
+	POS = 276.0 0.0 -346.0
+	ROT = 0.0 90.0 0.0
+	ROTDEST = 180.0
+END_DOORSET
+
+DOORSET
+	POS = 276.0 0.0 -428.0
+	ROT = 0.0 -90.0 0.0
+	ROTDEST = 180.0
+END_DOORSET
+
+DOORSET
+	POS = 346.0 0.0 -258.0
+	ROT = 0.0 0.0 0.0
+	ROTDEST = -90.0
+END_DOORSET
+
+DOORSET
+	POS = 428.0 0.0 -258.0
+	ROT = 0.0 180.0 0.0
+	ROTDEST = -90.0
+END_DOORSET
+
+DOORSET	#右上
+	POS = 365.0 0.0 276.0
+	ROT = 0.0 0.0 0.0
+	ROTDEST = 90.0
+END_DOORSET
+
+DOORSET	#左上
+	POS = -434.0 0.0 294.0
+	ROT = 0.0 0.0 0.0
+	ROTDEST = 90.0
+END_DOORSET
+
+DOORSET
+	POS = -350.0 0.0 294.0
+	ROT = 0.0 180.0 0.0
+	ROTDEST = 90.0
+END_DOORSET
+
+
+
+#====================================================================
+# コンテナの設定
+#====================================================================
+CONTAINERSET
+	POS = 430.0 0.0 -50.0
+	ROT = 0.0 0.0 0.0
+END_CONTAINERSET
+
+CONTAINERSET
+	POS = 430.0 0.0 50.0
+	ROT = 0.0 0.0 0.0
+END_CONTAINERSET
+
+CONTAINERSET
+	POS = -430.0 0.0 -50.0
+	ROT = 0.0 0.0 0.0
+END_CONTAINERSET
+
+CONTAINERSET
+	POS = -430.0 0.0 50.0
+	ROT = 0.0 0.0 0.0
+END_CONTAINERSET
+
+
+CONTAINERSET
+	POS = -160.0 0.0 -430.0
+	ROT = 0.0 0.0 0.0
+END_CONTAINERSET
+
+CONTAINERSET
+	POS = -10.0 0.0 -430.0
+	ROT = 0.0 0.0 0.0
+END_CONTAINERSET
+
+CONTAINERSET
+	POS = 140.0 0.0 -430.0
+	ROT = 0.0 0.0 0.0
+END_CONTAINERSET
+
+
+CONTAINERSET
+	POS = -160.0 0.0 470.0
+	ROT = 0.0 0.0 0.0
+END_CONTAINERSET
+
+CONTAINERSET
+	POS = -10.0 0.0 470.0
+	ROT = 0.0 0.0 0.0
+END_CONTAINERSET
+
+CONTAINERSET
+	POS = 140.0 0.0 470.0
+	ROT = 0.0 0.0 0.0
+END_CONTAINERSET
+
+
+CONTAINERSET
+	POS = -410.0 0.0 -450.0
+	ROT = 0.0 0.0 0.0
+END_CONTAINERSET
+
+CONTAINERSET
+	POS = 410.0 0.0 -450.0
+	ROT = 0.0 0.0 0.0
+END_CONTAINERSET
+
+#====================================================================
+# 部品の設置
+#====================================================================
+
+#====================================================================
+# 木箱の設置
+#====================================================================
+// 修理品
+BOXSET
+	POS = -410.0 0.0 450.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 1
+END_BOXSET
+
+BOXSET
+	POS = 410.0 0.0 450.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 2
+END_BOXSET
+
+BOXSET
+	POS = -410.0 0.0 -410.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 1
+END_BOXSET
+
+BOXSET
+	POS = 410.0 0.0 -410.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 1
+END_BOXSET
+
+// 壊すだけ
+BOXSET	# 左下
+	POS = -250.0 0.0 -305.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 2
+END_BOXSET
+
+BOXSET
+	POS = -200.0 0.0 -305.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 2
+END_BOXSET
+
+BOXSET
+	POS = -150.0 0.0 -305.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 2
+END_BOXSET
+
+BOXSET	# 右下
+	POS = 240.0 0.0 -305.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 2
+END_BOXSET
+
+BOXSET
+	POS = 190.0 0.0 -305.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 2
+END_BOXSET
+
+BOXSET
+	POS = 140.0 0.0 -305.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 2
+END_BOXSET
+
+BOXSET	# 左上
+	POS = -220.0 0.0 305.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 2
+END_BOXSET
+
+BOXSET
+	POS = -160.0 0.0 305.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 2
+END_BOXSET
+
+BOXSET	# 右上
+	POS = 260.0 0.0 305.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 2
+END_BOXSET
+
+BOXSET
+	POS = 200.0 0.0 305.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 2
+END_BOXSET
+
+BOXSET
+	POS = 140.0 0.0 305.0
+	ROT = 0.0 0.0 0.0
+	TYPE = 2
+END_BOXSET
+
+END_SCRIPT

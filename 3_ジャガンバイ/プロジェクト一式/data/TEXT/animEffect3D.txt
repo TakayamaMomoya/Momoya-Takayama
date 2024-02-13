@@ -1,0 +1,74 @@
+#====================================================================
+#
+# ３Dアニメーションエフェクト[animEffect3D.txt]
+# Author：Momoya Takayama
+#
+#====================================================================
+SCRIPT
+
+EFFECTSET		#0 マズルフラッシュ
+	PATH = data\TEXTURE\EFFECT\muzzleFlush.png
+	NUM_ANIM = 6
+	SPEED_ANIM = 1
+	SIZE = 70.0
+	COL = 1.0 1.0 1.0 1.0
+	IS_ADD = 0
+	IS_LOOP = 0
+	IS_BILLBOARD = 1
+END_EFFECTSET
+
+EFFECTSET		#1 血しぶき
+	PATH = data\TEXTURE\EFFECT\tomatoJuice.png
+	NUM_ANIM = 5
+	SPEED_ANIM = 2
+	SIZE = 60.0
+	COL = 1.0 1.0 1.0 1.0
+	IS_ADD = 0
+	IS_LOOP = 0
+	IS_BILLBOARD = 1
+END_EFFECTSET
+
+EFFECTSET		#2 血しぶき1
+	PATH = data\TEXTURE\EFFECT\bloodAnim.png
+	NUM_ANIM = 14
+	SPEED_ANIM = 1
+	SIZE = 100.0
+	COL = 1.0 1.0 1.0 1.0
+	IS_ADD = 0
+	IS_BILLBOARD = 1
+END_EFFECTSET
+
+EFFECTSET		#3 ビーム
+	PATH = data\TEXTURE\EFFECT\beam.png
+	NUM_ANIM = 6
+	SPEED_ANIM = 3
+	SIZE = 60.0
+	COL = 1.0 1.0 1.0 1.0
+	IS_ADD = 0
+	IS_LOOP = 1
+	IS_BILLBOARD = 0
+END_EFFECTSET
+
+EFFECTSET		#4 爆発のアニメーション
+	PATH = data\TEXTURE\EFFECT\explosion.png
+	NUM_ANIM = 14
+	SPEED_ANIM = 3
+	SIZE = 60.0
+	COL = 1.0 1.0 1.0 1.0
+	IS_ADD = 0
+	IS_LOOP = 0
+	IS_BILLBOARD = 1
+END_EFFECTSET
+
+EFFECTSET		#5 命中アニメーション
+	PATH = data\TEXTURE\EFFECT\hit00.png
+	NUM_ANIM = 7
+	SPEED_ANIM = 2
+	SIZE = 80.0
+	COL = 1.0 1.0 1.0 1.0
+	IS_ADD = 0
+	IS_LOOP = 0
+	IS_BILLBOARD = 1
+END_EFFECTSET
+
+END_SCRIPT
