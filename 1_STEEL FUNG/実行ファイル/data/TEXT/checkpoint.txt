@@ -1,0 +1,45 @@
+#==============================================================================
+#
+# チェックポイントの配置 [checkpoint.txt]
+# Author : 髙山桃也
+#
+#==============================================================================
+NUM_CHECKPOINT = 3
+
+CHECKPOINTSET	# 最初期スポーン地点
+	POS = 10.0 -16.9 0.0
+END_CHECKPOINTSET
+
+CHECKPOINTSET	# 1番目のチェックポイント
+	POS = 10006.92 48.58 0.0
+	
+	POS = 10.0 -16.9 0.0
+	
+		NUM_ENEMY = 4
+	
+		ENEMYSET
+			POS = 10006.92 1000.0 1000.0
+			TYPE = 1
+		END_ENEMYSET
+		
+		ENEMYSET
+			POS = 10506.92 500.0 -1000.0
+			TYPE = 1
+		END_ENEMYSET
+		
+		ENEMYSET
+			POS = 11006.92 1000.0 -1500.0
+			TYPE = 1
+		END_ENEMYSET
+
+		ENEMYSET
+			POS = 12006.92 1500.0 -1500.0
+			TYPE = 2
+		END_ENEMYSET
+END_CHECKPOINTSET
+
+CHECKPOINTSET	# 2番目のチェックポイント
+	POS = 21029.92 39.06 0.0
+END_CHECKPOINTSET
+
+END_SCRIPT		# この行は絶対消さないこと！

@@ -1,0 +1,38 @@
+#====================================================================
+#
+# 破片ファイル[debris.txt]
+# Author：Momoya Takayama
+#
+#====================================================================
+SCRIPT
+
+DEBRISSET		#1 壁の破片
+	MODEL_TYPE = 1	# 1～で設定
+	LIFE_DEBRISSPAWNER = 1
+    NUM_DEBRIS = 20
+    LIFE_DEBRIS = 100
+    SPEED_DEBRIS = 6.0
+    GRAVITY = 0.3
+    DECREASE = -1.11
+    RANGEROT = 0.7
+    IS_ROT = 0
+    IS_TURN = 0
+    IS_BAUNCE = 1
+END_DEBRISSET
+
+DEBRISSET		#1 土の破片
+	MODEL_TYPE = 2	# 1～で設定
+	LIFE_DEBRISSPAWNER = 1
+    NUM_DEBRIS = 200
+    LIFE_DEBRIS = 100
+    SPEED_DEBRIS = 6.0
+    GRAVITY = 0.3
+    DECREASE = -1.11
+    RANGEROT = 0.7
+    IS_ROT = 0
+    IS_TURN = 1
+    IS_BAUNCE = 0
+END_DEBRISSET
+
+
+END_SCRIPT

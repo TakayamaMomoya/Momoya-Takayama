@@ -1,0 +1,139 @@
+#====================================================================
+#
+# パーティクルスクリプトファイル[particle.txt]
+# Author：Momoya Takayama
+#
+#====================================================================
+SCRIPT
+
+PARTICLESET		#1 爆発のパーティクル
+	TEXTURE_PATH = data//TEXTURE//EFFECT//effect000.png
+    LIFE_PARTICLE = 1
+    NUM_EFFECT = 114
+    LIFE_EFFECT = 61
+    RADIUS_EFFECT = 10.33
+    SPEED_EFFECT = 6.03
+    GRAVITY = -0.00
+    DECREASE = -1.11
+    RANGEROT = 0.07
+    IS_ADD = 1
+    IS_ROT = 0
+    IS_TURN = 0
+    COLOR = 0.73 0.26 0.10 1.00
+END_PARTICLESET
+
+PARTICLESET		#2 収束爆発
+	TEXTURE_PATH = data//TEXTURE//EFFECT//effect000.png
+    LIFE_PARTICLE = 360
+    NUM_EFFECT = 7
+    LIFE_EFFECT = 20
+    RADIUS_EFFECT = 34.60
+    SPEED_EFFECT = 11.32
+    GRAVITY = -0.00
+    DECREASE = -0.54
+    RANGEROT = 0.00
+    IS_ADD = 1
+    IS_ROT = 0
+    IS_TURN = 0
+    MODE_RENDER = 2
+    COLOR = 0.52 0.15 0.03 1.00
+END_PARTICLESET
+
+PARTICLESET		#3 ビームサーベル
+	TEXTURE_PATH = data//TEXTURE//EFFECT//smoke.png
+    LIFE_PARTICLE = 1
+    NUM_EFFECT = 8
+    LIFE_EFFECT = 59
+    RADIUS_EFFECT = 33.22
+    SPEED_EFFECT = 18.73
+    GRAVITY = -0.00
+    DECREASE = 0.56
+    RANGEROT = 0.07
+    IS_ADD = 1
+    IS_ROT = 1
+    IS_TURN = 0
+    MODE_RENDER = 2
+    COLOR = 0.86 0.05 0.06 1.00
+END_PARTICLESET
+
+PARTICLESET		#3 撃破煙
+	TEXTURE_PATH = data//TEXTURE//EFFECT//smoke.png
+    LIFE_PARTICLE = 1
+    NUM_EFFECT = 2
+    LIFE_EFFECT = 99
+    RADIUS_EFFECT = 39.12
+    SPEED_EFFECT = 0.97
+    GRAVITY = -0.04
+    DECREASE = -0.00
+    RANGEROT = 1.44
+    IS_ADD = 0
+    IS_ROT = 0
+    IS_TURN = 0
+    COLOR = 0.40 0.38 0.38 1.00
+END_PARTICLESET
+
+PARTICLESET		#4 トマト汁
+	TEXTURE_PATH = data//TEXTURE//EFFECT//blood.png
+    LIFE_PARTICLE = 2
+    NUM_EFFECT = 79
+    LIFE_EFFECT = 13
+    RADIUS_EFFECT = 3.01
+    SPEED_EFFECT = 16.00
+    GRAVITY = 0.94
+    DECREASE = -2.54
+    RANGEROT = 0.07
+    IS_ADD = 0
+    IS_ROT = 0
+    IS_TURN = 0
+    COLOR = 1.00 0.00 0.00 1.00
+END_PARTICLESET
+
+PARTICLESET		#5 砂煙
+    TEXTURE_PATH = data\\TEXTURE\\EFFECT\\smoke.png
+    LIFE_PARTICLE = 1
+    NUM_EFFECT = 3
+    LIFE_EFFECT = 72
+    RADIUS_EFFECT = 24.22
+    SPEED_EFFECT = 6.00
+    GRAVITY = 0.18
+    DECREASE = -0.00
+    RANGEROT = 1.44
+    IS_ADD = 0
+    IS_ROT = 1
+    IS_TURN = 0
+    COLOR = 0.71 0.61 0.52 1.00
+END_PARTICLESET
+
+PARTICLESET		#6 ミサイルの煙
+    TEXTURE_PATH = data\\TEXTURE\\EFFECT\\smoke.png
+    LIFE_PARTICLE = 1
+    NUM_EFFECT = 2
+    LIFE_EFFECT = 52
+    RADIUS_EFFECT = 24.22
+    SPEED_EFFECT = 3.47
+    GRAVITY = -0.00
+    DECREASE = -0.00
+    RANGEROT = 1.44
+    IS_ADD = 0
+    IS_ROT = 0
+    IS_TURN = 0
+    COLOR = 0.80 0.79 0.79 1.00
+END_PARTICLESET
+
+PARTICLESET		#7 ブレードの余韻
+    TEXTURE_PATH = data\\TEXTURE\\EFFECT\\effect000.png
+    LIFE_PARTICLE = 1
+    NUM_EFFECT = 1
+    LIFE_EFFECT = 118
+    RADIUS_EFFECT = 30.00
+    SPEED_EFFECT = 6.00
+    GRAVITY = -0.00
+    DECREASE = -0.00
+    RANGEROT = 1.10
+    IS_ADD = 1
+    IS_ROT = 1
+    IS_TURN = 0
+    COLOR = 0.86 0.05 0.06 1.00
+END_PARTICLESET
+
+END_SCRIPT
