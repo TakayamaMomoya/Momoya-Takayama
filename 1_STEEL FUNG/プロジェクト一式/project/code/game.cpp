@@ -31,6 +31,7 @@
 #include "player.h"
 #include "slow.h"
 #include "checkPointManager.h"
+#include "saveDataManager.h"
 #include "blockManager.h"
 #include "meshfield.h"
 #include "enemyBoss.h"
@@ -38,6 +39,7 @@
 #include "particle.h"
 #include "beamBlade.h"
 #include "boostEffect.h"
+#include "limit.h"
 
 //*****************************************************
 // マクロ定義
@@ -55,6 +57,7 @@ CGame *CGame::m_pGame = nullptr;	// 自身のポインタ
 //=====================================================
 CGame::CGame()
 {
+	m_nAddReward = 0;
 	m_nCntState = 0;
 	m_bStop = false;
 }
@@ -65,6 +68,11 @@ CGame::CGame()
 HRESULT CGame::Init(void)
 {
 	m_pGame = this;
+
+	CSaveDataManager *pSave = CSaveDataManager::GetInstance();
+
+	if (pSave != nullptr)
+		pSave->Load();
 
 	m_state = STATE_NORMAL;
 	m_bStop = false;
@@ -78,22 +86,10 @@ HRESULT CGame::Init(void)
 	// ブロック管理の生成
 	CBlockManager::Create();
 
-	// チェックポイント管理の生成
-	CCheckPointManager::Create();
-
-	// 敵マネージャーの生成
-	CEnemyManager *pEnemyManager = CEnemyManager::Create();
-
 	// ３Dアニメーション管理の生成
 	CAnimEffect3D::Create();
 
-	// サウンドインスタンスの取得
-	CSound* pSound = CSound::GetInstance();
-
-	if (pSound != nullptr)
-	{
-		//pSound->Play(pSound->LABEL_BGM_GAME);
-	}
+	Sound::Play(CSound::LABEL_BGM_GAME);
 
 	// フォグをかける
 	CRenderer *pRenderer = CRenderer::GetInstance();
@@ -106,11 +102,43 @@ HRESULT CGame::Init(void)
 	// プレイヤーの生成
 	CPlayer::Create();
 
+	// チェックポイント管理の生成
+	CCheckPointManager::Create();
+
+	// 敵マネージャーの生成
+	CEnemyManager *pEnemyManager = CEnemyManager::Create();
+
 	// スロー管理の生成
 	CSlow::Create();
 
 	// メッシュフィールド生成
 	CMeshField::Create();
+
+	D3DXVECTOR3 aPos[4] =
+	{
+		{0.0f,0.0f,15000.0f},
+		{22000.0f,0.0f,0.0f},
+		{0.0f,0.0f,-15000.0f},
+		{-7000.0f,0.0f,0.0f},
+	};
+	D3DXVECTOR3 aRot[4] =
+	{
+		{0.0f,0.0f,0.0f},
+		{0.0f,D3DX_PI * 0.5f,0.0f},
+		{0.0f,D3DX_PI,0.0f},
+		{0.0f,-D3DX_PI * 0.5f,0.0f},
+	};
+
+	for (int i = 0; i < 4; i++)
+	{
+		CLimit *pLimit = CLimit::Create();
+
+		if (pLimit != nullptr)
+		{
+			pLimit->SetPosition(aPos[i]);
+			pLimit->SetRotation(aRot[i]);
+		}
+	}
 
 	//CEnemyBoss::Create();
 
@@ -122,6 +150,11 @@ HRESULT CGame::Init(void)
 //=====================================================
 void CGame::Uninit(void)
 {
+	CSaveDataManager *pSave = CSaveDataManager::GetInstance();
+
+	if (pSave != nullptr)
+		pSave->Save();
+
 	// オブジェクト全棄
 	CObject::ReleaseAll();
 
@@ -146,26 +179,11 @@ void CGame::Update(void)
 
 		// カーソルを中心に固定
 		SetCursorPos((int)(SCREEN_WIDTH * 0.5f), (int)(SCREEN_HEIGHT * 0.5f));
-
-		if (pInputManager != nullptr)
-		{
-			if (pInputManager->GetTrigger(CInputManager::BUTTON_PAUSE))
-			{
-				CPause::Create();
-			}
-		}
 	}
 	else
 	{
 		// 停止しないオブジェクトの更新
 		CObject::UpdateNotStop();
-
-		CPause *pPause = CPause::GetInstance();
-
-		if (pPause != nullptr)
-		{
-			pPause->Update();
-		}
 	}
 
 	// カメラ更新
@@ -174,9 +192,9 @@ void CGame::Update(void)
 	// 状態管理
 	ManageState();
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	Debug();
-#endif
+//#endif
 }
 
 //=====================================================
@@ -216,7 +234,7 @@ void CGame::ManageState(void)
 
 		if (m_nCntState >= TRANS_TIME && pFade != nullptr)
 		{
-			pFade->SetFade(CScene::MODE_RANKING);
+			pFade->SetFade(CScene::MODE_TITLE);
 		}
 
 		break;
@@ -296,4 +314,5 @@ void CGame::Draw(void)
 	};
 
 	pDebugProc->Print("\nゲームの状態[%s]\n", apString[m_state]);
+	pDebugProc->Print("停止[%d]\n", m_bStop);
 }

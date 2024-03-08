@@ -32,6 +32,7 @@
 //*****************************************************
 #define SCREEN_WIDTH			(1280)									// ウィンドウの幅
 #define SCREEN_HEIGHT			(720)									// ウィンドウの高さ
+#define SCRN_MID (D3DXVECTOR3(SCREEN_WIDTH * 0.5f,SCREEN_HEIGHT * 0.5f,0.0f))	// 画面中心
 #define FVF_VERTEX_2D			(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)		// 頂点フォーマット設定
 #define FVF_VERTEX_3D			(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX1)		//頂点フォーマット設定
 #define NUM_PLAYER (4)	// プレイヤーの最大数

@@ -22,8 +22,10 @@
 #include "motion.h"
 #include "universal.h"
 #include "animEffect3D.h"
+#include "anim3D.h"
 #include "sound.h"
 #include "particle.h"
+#include "debrisSpawner.h"
 #include "texture.h"
 #include "UI.h"
 #include "slow.h"
@@ -67,41 +69,14 @@ CEnemy::CEnemy()
 	// 総数カウントアップ
 	m_nNumAll++;
 
-	// 先頭、最後尾アドレス取得
-	CEnemyManager *pManager = CEnemyManager::GetInstance();
-	CEnemy *pHead = nullptr;
-	CEnemy *pTail = nullptr;
-
-	if (pManager != nullptr)
-	{
-		pHead = pManager->GetHead();
-		pTail = pManager->GetTail();
-	}
-
 	ZeroMemory(&m_info, sizeof(SInfo));
 
-	// 値のクリア
-	m_pPrev = nullptr;
-	m_pNext = nullptr;
+	// リストに追加
+	CEnemyManager *pEnemyManager = CEnemyManager::GetInstance();
 
-	if (pHead == nullptr)
-	{// 先頭と最後尾アドレスの代入
-		pManager->SetHead(this);
-		pManager->SetTail(this);
-
-		return;
-	}
-
-	// 前のアドレスに最後尾のアドレスを代入する
-	m_pPrev = pTail;
-
-	// 最後尾のアドレスを自分にする
-	pManager->SetTail(this);
-
-	if (m_pPrev != nullptr)
+	if (pEnemyManager != nullptr)
 	{
-		// 前のオブジェクトの次のアドレスを自分にする
-		m_pPrev->m_pNext = this;
+		pEnemyManager->AddToList(this);
 	}
 }
 
@@ -110,55 +85,14 @@ CEnemy::CEnemy()
 //=====================================================
 CEnemy::~CEnemy()
 {
-	// 先頭、最後尾アドレス取得
-	CEnemyManager *pManager = CEnemyManager::GetInstance();
-	CEnemy *pHead = nullptr;
-	CEnemy *pTail = nullptr;
-
-	if (pManager != nullptr)
-	{
-		pHead = pManager->GetHead();
-		pTail = pManager->GetTail();
-	}
-
 	m_nNumAll--;
 
-	if (pTail != this && pHead != this)
-	{// 真ん中のアドレスの破棄
-		if (m_pPrev != nullptr)
-		{
-			// 前のアドレスから次のアドレスをつなぐ
-			m_pPrev->m_pNext = m_pNext;
-		}
+	// リストから削除
+	CEnemyManager *pEnemyManager = CEnemyManager::GetInstance();
 
-		if (m_pNext != nullptr)
-		{
-			// 次のアドレスから前のアドレスをつなぐ
-			m_pNext->m_pPrev = m_pPrev;
-		}
-	}
-
-	if (pHead == this)
-	{// 先頭アドレスの破棄
-		//if (m_pNext != nullptr)
-		{// 先頭アドレスを次のアドレスに引き継ぐ
-			pManager->SetHead(m_pNext);
-
-			if (m_pNext != nullptr)
-			{
-				m_pNext->m_pPrev = nullptr;
-			}
-		}
-	}
-	
-	if (pTail == this)
-	{// 最後尾アドレスの破棄
-		if (m_pPrev != nullptr)
-		{// 最後尾アドレスを前のアドレスに引き継ぐ
-			pManager->SetTail(m_pPrev);
-
-			m_pPrev->m_pNext = nullptr;
-		}
+	if (pEnemyManager != nullptr)
+	{
+		pEnemyManager->RemoveFromList(this);
 	}
 }
 
@@ -203,16 +137,17 @@ HRESULT CEnemy::Init(void)
 	CMotion::Init();
 
 	// タイプの設定
-	SetType(TYPE_ENEMY);
+	CObject::SetType(TYPE_ENEMY);
 
 	// 当たり判定生成
 	CreateCollision();
 
 	// パラメーター初期設定
-	m_info.fLife = INITIAL_LIFE;
+	SetLife(INITIAL_LIFE, true);
 	SetMoveSpeed(INITIAL_SPEED);
 	m_info.fDistLock = INITIAL_DIST_LOCK;
 	m_info.bStamp = true;
+	m_info.fFactMove = 0.98f;
 
 	// 通常状態にする
 	m_info.state = STATE_NORMAL;
@@ -221,7 +156,7 @@ HRESULT CEnemy::Init(void)
 	SetPositionOld(GetPosition());
 
 	// 影の有効可
-	EnableShadow(true);
+	//EnableShadow(true);
 	SetPosShadow(D3DXVECTOR3(0.0f, 0.5f, 0.0f));
 
 	for (int i = 0; i < MOVESTATE_MAX; i++)
@@ -269,9 +204,6 @@ void CEnemy::Update(void)
 	// 移動状態管理
 	ManageMoveState();
 
-	// 当たり判定の管理
-	ManageCollision();
-
 	// 移動量を反映
 	D3DXVECTOR3 pos = GetPosition();
 	D3DXVECTOR3 move = GetMove();
@@ -295,8 +227,11 @@ void CEnemy::Update(void)
 
 	SetPosition(pos);
 
+	// 当たり判定の管理
+	ManageCollision();
+
 	// 移動量の減衰
-	move *= 0.95f;
+	move *= m_info.fFactMove;
 	SetMove(move);
 }
 
@@ -490,6 +425,10 @@ void CEnemy::CollisionThrown(void)
 		{
 			// 当たった敵にダメージを与える
 			m_info.pCollisionSphere->DamageAll(CCollision::TAG_ENEMY, DAMAGE_THROWN);
+
+			D3DXVECTOR3 move = { 0.0f,0.0f,0.0f };
+
+			SetMove(move);
 		}
 
 		if (m_info.pCollisionSphere != nullptr)
@@ -504,6 +443,8 @@ void CEnemy::CollisionThrown(void)
 //=====================================================
 void CEnemy::Wait(void)
 {
+	MoveToDest(m_info.posDest, 1.0f);
+
 	CPlayer *pPlayer = CPlayer::GetInstance();
 
 	if (pPlayer == nullptr)
@@ -518,6 +459,14 @@ void CEnemy::Wait(void)
 	D3DXVECTOR3 vecDiff = posPlayer - pos;
 
 	fDist = D3DXVec3Length(&vecDiff);
+
+	float fRot = atan2f(vecDiff.x, vecDiff.z);
+
+	D3DXVECTOR3 rot = GetRotation();
+
+	universal::FactingRot(&rot.y, fRot, 0.1f);
+
+	SetRotation(rot);
 
 	if (m_info.aDistMoveState[MOVESTATE_CHASE] > fDist)
 	{// 追跡に移行
@@ -632,8 +581,11 @@ void CEnemy::Attack(void)
 //=====================================================
 // 体力設定
 //=====================================================
-void CEnemy::SetLife(float fLife)
+void CEnemy::SetLife(float fLife, bool bInit)
 {
+	if (bInit)
+		m_info.fLifeInitial = fLife;
+
 	m_info.fLife = fLife;
 
 	if (m_info.fLife < 0)
@@ -651,21 +603,11 @@ void CEnemy::Hit(float fDamage)
 	{
 		m_info.fLife -= fDamage;
 
-		// ダメージエフェクトの生成
-		CAnimEffect3D *pAnim3D = CAnimEffect3D::GetInstance();
-
 		CSound* pSound = CSound::GetInstance();
 
 		if (pSound != nullptr)
 		{
-			pSound->Play(pSound->LABEL_SE_HIT);
-		}
-
-		if (pAnim3D != nullptr)
-		{
-			D3DXVECTOR3 pos = GetPosition();
-
-			pAnim3D->CreateEffect(pos,CAnimEffect3D::TYPE::TYPE_HIT00);
+			//pSound->Play(pSound->LABEL_SE_HIT);
 		}
 
 		if (m_info.fLife <= 0.0f)
@@ -676,16 +618,6 @@ void CEnemy::Hit(float fDamage)
 
 			// スコア管理
 			ManageScore();
-
-			if (pAnim3D != nullptr)
-			{
-				D3DXVECTOR3 pos = GetPosition();
-
-				pAnim3D->CreateEffect(pos, CAnimEffect3D::TYPE::TYPE_HIT00);
-			}
-
-			// トマト汁
-			CParticle::Create(GetPosition(), CParticle::TYPE::TYPE_EXPLOSION);
 
 			// 死亡処理
 			Death();
@@ -710,7 +642,24 @@ void CEnemy::Hit(float fDamage)
 //=====================================================
 void CEnemy::Death(void)
 {
+	Sound::Play(CSound::LABEL_SE_EXPLOSION00);
+
+	D3DXVECTOR3 pos = GetMtxPos(0);
+
+	// アニメーションエフェクト生成
+	CAnimEffect3D *pAnim3D = CAnimEffect3D::GetInstance();
+
+	if (pAnim3D != nullptr)
+	{
+		CAnim3D *pAnim = pAnim3D->CreateEffect(pos, CAnimEffect3D::TYPE::TYPE_EXPLOSION);
+	}
+
+	// 破片生成
+	CDebrisSpawner::Create(pos, CDebrisSpawner::TYPE::TYPE_DEATH);
+
 	m_info.state = STATE_DEATH;
+
+	Uninit();
 }
 
 //=====================================================

@@ -1,6 +1,6 @@
 //*****************************************************
 //
-//ÉZÅ[ÉuÉfÅ[É^ä«óù[saveDataManager.cpp]
+// ÉZÅ[ÉuÉfÅ[É^ä«óù[saveDataManager.cpp]
 // Author:˚¸éRìçñÁ
 //
 //*****************************************************
@@ -9,6 +9,9 @@
 // ÉCÉìÉNÉãÅ[Éh
 //*****************************************************
 #include "saveDataManager.h"
+#include "checkPointManager.h"
+#include "player.h"
+#include "game.h"
 #include <stdio.h>
 
 //*****************************************************
@@ -29,7 +32,7 @@ CSaveDataManager *CSaveDataManager::m_pSaveDataManager = nullptr;	// é©êgÇÃÉ|ÉCÉ
 //=====================================================
 CSaveDataManager::CSaveDataManager()
 {
-	m_nProgress = 0;
+	ZeroMemory(&m_info, sizeof(SInfo));
 }
 
 //=====================================================
@@ -88,10 +91,36 @@ void CSaveDataManager::Load(void)
 			(void)fscanf(pFile, "%s", &cTemp[0]);
 
 			if (strcmp(cTemp, "PROGRESS") == 0)
-			{// êiçsèÛãµì«çû
+			{// êiçsèÛãµ
 				(void)fscanf(pFile, "%s", &cTemp[0]);
 
-				(void)fscanf(pFile, "%d", &m_nProgress);
+				(void)fscanf(pFile, "%d", &m_info.nProgress);
+			}
+
+			if (strcmp(cTemp, "LIFE_PLAYER") == 0)
+			{// ëÃóÕ
+				(void)fscanf(pFile, "%s", &cTemp[0]);
+
+				(void)fscanf(pFile, "%f", &m_info.fLife);
+			}
+
+			if (strcmp(cTemp, "INITIALLIFE_PLAYER") == 0)
+			{// èâä˙ëÃóÕ
+				(void)fscanf(pFile, "%s", &cTemp[0]);
+
+				(void)fscanf(pFile, "%f", &m_info.fInitialLife);
+			}
+
+			if (strcmp(cTemp, "ADDREWARD") == 0)
+			{// â¡éZïÒèV
+				(void)fscanf(pFile, "%s", &cTemp[0]);
+
+				(void)fscanf(pFile, "%d", &m_info.nAddReward);
+			}
+
+			if (strcmp(cTemp, "END_SCRIPT") == 0)
+			{
+				break;
 			}
 		}
 	}
@@ -104,7 +133,7 @@ void CSaveDataManager::Uninit(void)
 {
 	m_pSaveDataManager = nullptr;
 
-	Release();
+	delete this;
 }
 
 //=====================================================
@@ -112,33 +141,42 @@ void CSaveDataManager::Uninit(void)
 //=====================================================
 void CSaveDataManager::Save(void)
 {
-	FILE *pFile = NULL;
+	CCheckPointManager *pCheck = CCheckPointManager::GetInstance();
+	CPlayer *pPlayer = CPlayer::GetInstance();
+	CGame *pGame = CGame::GetInstance();
+
+	if (pCheck == nullptr || pGame == nullptr)
+		assert(("ï€ë∂é∏îsÅI",false));
+
+	float fIntialLife = 0;
+	float fLife = 0;
+
+	if (pPlayer != nullptr)
+	{
+		fIntialLife = pPlayer->GetParam().fInitialLife;
+		fLife = pPlayer->GetLife();
+	}
+
+	int nProgress = pCheck->GetProgress();
+
+	int nAddReward = pGame->GetAddReward();
+
+	FILE *pFile = nullptr;
 
 	pFile = fopen(SAVE_PATH, "w");
 
-	if (pFile != NULL)
+	if (pFile != nullptr)
 	{
-		// êiçsèÛãµ
-		fprintf(pFile, "PROGRESS = %d\n", m_nProgress);
+		fprintf(pFile, "PROGRESS = %d\n", nProgress);
 
-		fprintf(pFile, "END_SCRIPT\n");
+		fprintf(pFile, "LIFE_PLAYER = %.2f\n", fLife);
+
+		fprintf(pFile, "INITIALLIFE_PLAYER = %.2f\n", fIntialLife);
+
+		fprintf(pFile, "ADDREWARD = %d\n", nAddReward);
+
+		fprintf(pFile, "END_SCRIPT");
 
 		fclose(pFile);
 	}
-}
-
-//=====================================================
-// çXêVèàóù
-//=====================================================
-void CSaveDataManager::Update(void)
-{
-
-}
-
-//=====================================================
-// ï`âÊèàóù
-//=====================================================
-void CSaveDataManager::Draw(void)
-{
-
 }

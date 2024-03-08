@@ -142,6 +142,13 @@ void CInputManager::Update(void)
 		pMouse->GetTrigger(CInputMouse::BUTTON_RMB)
 	);
 
+	// スキップボタン
+	m_info.abPress[BUTTON_SKIP] =
+	(
+		pJoypad->GetPress(CInputJoypad::PADBUTTONS_START,0) ||
+		pKeyboard->GetPress(DIK_TAB)
+	);
+
 	// ジャンプ
 	m_info.abTrigger[BUTTON_JUMP] =
 	(
@@ -280,9 +287,4 @@ void CInputManager::Update(void)
 	m_axis.axisCamera += D3DXVECTOR3(pMouse->GetMoveIX(), pMouse->GetMoveIY(), 0.0f);
 
 	D3DXVec3Normalize(&m_axis.axisCamera, &m_axis.axisCamera);
-
-	for (int i = 0; i < BUTTON::BUTTON_MAX;i++)
-	{
-		CDebugProc::GetInstance()->Print("\n操作%d[%d]", i, m_info.abTrigger[i]);
-	}
 }

@@ -143,11 +143,7 @@ void CObject2D::Uninit(void)
 //=====================================================
 void CObject2D::Update(void)
 {
-	// 前回の位置を保存
-	m_posOld = m_pos;
 
-	// 位置を移動
-	m_pos += m_move;
 }
 
 //=====================================================
@@ -402,39 +398,5 @@ void CObject2D::SetCol(D3DXCOLOR col)
 
 		// 頂点バッファのアンロック
 		m_pVtxBuff->Unlock();
-	}
-}
-
-//=====================================================
-// 移動制限処理
-//=====================================================
-void CObject2D::LimitPos(void)
-{
-	if (m_pos.y < 0 + m_heigth)
-	{// 画面上の判定
-		m_pos.y = m_heigth;
-
-		m_move.y = 0.0f;
-	}
-
-	if (m_pos.y > SCREEN_HEIGHT - m_heigth)
-	{// 画面下の判定
-		m_pos.y = SCREEN_HEIGHT - m_heigth;
-
-		m_move.y = 0.0f;
-	}
-
-	if (m_pos.x < 0 + m_width)
-	{// 画面左の判定
-		m_pos.x = m_width;
-
-		m_move.x = 0.0f;
-	}
-
-	if (m_pos.x > SCREEN_WIDTH - m_width)
-	{// 画面右の判定
-		m_pos.x = SCREEN_WIDTH - m_width;
-
-		m_move.x = 0.0f;
 	}
 }

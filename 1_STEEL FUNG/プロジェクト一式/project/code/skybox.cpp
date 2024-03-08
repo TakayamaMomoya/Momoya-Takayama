@@ -36,12 +36,12 @@ HRESULT CSkybox::Init(void)
 	// Œp³ƒNƒ‰ƒX‚Ì‰Šú‰»
 	CObjectX::Init();
 
-	SetEmissiveCol(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
-
 	// ƒ‚ƒfƒ‹‚Ì“Ç
 	int nIdx = CModel::Load("data\\MODEL\\skybox\\sky00.x");
 	SetIdxModel(nIdx);
 	BindModel(nIdx);
+	EnableLighting(true);
+	EnableFog(false);
 
 	return S_OK;
 }

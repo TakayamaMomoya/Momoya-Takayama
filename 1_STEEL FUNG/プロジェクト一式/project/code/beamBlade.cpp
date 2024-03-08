@@ -78,6 +78,7 @@ HRESULT CBeamBlade::Init(void)
 			m_info.pBlade->SetSize(m_info.fRadius, m_info.fHeight);
 			m_info.pBlade->SetPosition(D3DXVECTOR3(0.0f, m_info.fHeight, 0.0f));
 			m_info.pBlade->EnableAdd(true);
+			m_info.pBlade->SetAlphaTest(70);
 
 			int nIdx = Texture::GetIdx("data\\TEXTURE\\EFFECT\\blade.png");
 
@@ -95,6 +96,7 @@ HRESULT CBeamBlade::Init(void)
 			m_info.pCylinder->SetRadius(m_info.fRadius * 0.8f);
 			m_info.pCylinder->SetVtx();
 			m_info.pCylinder->EnableAdd(true);
+			m_info.pCylinder->SetAlphaTest(70);
 
 			int nIdx = Texture::GetIdx("data\\TEXTURE\\EFFECT\\energy00.png");
 
@@ -131,7 +133,7 @@ void CBeamBlade::Uninit(void)
 void CBeamBlade::Update(void)
 {
 	// ƒVƒŠƒ“ƒ_[‚ðŠÛ‚­‚·‚é
-		// î•ñŽæ“¾
+	// î•ñŽæ“¾
 	CMeshCylinder *pMesh = m_info.pCylinder;
 	LPDIRECT3DVERTEXBUFFER9 pVtxBuff = m_info.pCylinder->GetVtxBuff();
 

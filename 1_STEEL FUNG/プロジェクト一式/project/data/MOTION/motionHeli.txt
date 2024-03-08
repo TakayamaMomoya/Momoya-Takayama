@@ -32,7 +32,7 @@ CHARACTERSET
     PARTSSET
         INDEX = 1
         PARENT = 0
-        POS = 0.0 24.5 -0.6
+        POS = 0.0 73.5 -0.6
         ROT = 0.0 0.0 0.0
     END_PARTSSET
 END_CHARACTERSET

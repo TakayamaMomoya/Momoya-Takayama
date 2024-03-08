@@ -41,12 +41,10 @@ CNumber::~CNumber()
 }
 
 //=====================================================
-//	初期化処理
+// 初期化処理
 //=====================================================
 HRESULT CNumber::Init(void)
 {
-	//m_pos = {700.0f,50.0f,0.0f};
-
 	for (int nCount = 0; nCount < m_nNumPlace; nCount++)
 	{
 		if (m_apObject[nCount] != nullptr)
@@ -57,7 +55,7 @@ HRESULT CNumber::Init(void)
 	}
 
 	// テクスチャ番号取得
-	m_nIdxTexture = CTexture::GetInstance()->Regist("data\\TEXTURE\\UI\\number001.png");
+	m_nIdxTexture = CTexture::GetInstance()->Regist("data\\TEXTURE\\UI\\number00.png");
 
 	for (int nCnt = 0; nCnt < m_nNumPlace; nCnt++)
 	{// テクスチャ番号取得
@@ -71,28 +69,32 @@ HRESULT CNumber::Init(void)
 }
 
 //=====================================================
-//	終了処理
+// 終了処理
 //=====================================================
 void CNumber::Uninit(void)
 {
-	for (int nCount = 0; nCount < m_nNumPlace; nCount++)
+	for (int nCount = 0; nCount < MAX_PLACE; nCount++)
 	{
-		m_apObject[nCount]->Uninit();
+		if (m_apObject[nCount] != nullptr)
+		{
+			m_apObject[nCount]->Uninit();
+			m_apObject[nCount] = nullptr;
+		}
 	}
 
 	Release();
 }
 
 //=====================================================
-//	更新処理
+// 更新処理
 //=====================================================
 void CNumber::Update(void)
 {
-	SetValue(m_nValue, m_nNumPlace);
+
 }
 
 //=====================================================
-//	値設定処理
+// 値設定処理
 //=====================================================
 void CNumber::SetValue(int nValue,int nNumPlace)
 {
@@ -106,16 +108,17 @@ void CNumber::SetValue(int nValue,int nNumPlace)
 
 	for (int nCount = 0; nCount < m_nNumPlace; nCount++)
 	{
-		aData1 = (int)pow(10.0f, m_nNumPlace - nCount);
-		aData2 = (int)pow(10.0f, m_nNumPlace - nCount - 1);
-
-		aTexU[nCount] = m_nValue % aData1 / aData2;
-
-		D3DXVECTOR2 leftUp = { 0.0f + 0.1f * aTexU[nCount], 0.0f };
-		D3DXVECTOR2 rightDown = { 0.1f + 0.1f * aTexU[nCount], 1.0f };
-
 		if (m_apObject[nCount] != nullptr)
 		{
+			aData1 = (int)pow(10.0f, m_nNumPlace - nCount);
+			aData2 = (int)pow(10.0f, m_nNumPlace - nCount - 1);
+
+			aTexU[nCount] = m_nValue % aData1 / aData2;
+
+			D3DXVECTOR2 leftUp = { 0.0f + 0.1f * aTexU[nCount], 0.0f };
+			D3DXVECTOR2 rightDown = { 0.1f + 0.1f * aTexU[nCount], 1.0f };
+
+
 			m_apObject[nCount]->SetVtx();
 
 			m_apObject[nCount]->SetTex(leftUp, rightDown);
@@ -210,35 +213,32 @@ D3DXCOLOR CNumber::GetColor(void)
 //=====================================================
 // 生成処理
 //=====================================================
-CNumber *CNumber::Create(int nNumPlace,int nValue)
+CNumber *CNumber::Create(int nNumPlace, int nValue)
 {
 	CNumber *pNumber = nullptr;
 
-	if (pNumber == nullptr)
-	{
-		pNumber = new CNumber;
+	pNumber = new CNumber;
 
+	if (pNumber != nullptr)
+	{
 		pNumber->m_nNumPlace = nNumPlace;
 
 		pNumber->m_nValue = nValue;
 
 		for (int nCnt = 0; nCnt < nNumPlace; nCnt++)
 		{// 数字用のインスタンスを生成
-
 			pNumber->m_apObject[nCnt] = nullptr;
 
 			if (pNumber->m_apObject[nCnt] == nullptr)
 			{
 				pNumber->m_apObject[nCnt] = CUI::Create();
-
-				pNumber->m_apObject[nCnt]->Init();
 			}
 		}
 
 		// 初期化処理
 		pNumber->Init();
 
-		pNumber->SetValue(nValue,nNumPlace);
+		pNumber->SetValue(nValue, nNumPlace);
 	}
 
 	return pNumber;

@@ -57,12 +57,6 @@
     <ClCompile Include="code\motion.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="code\number.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="code\number3D.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="code\objectX.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -153,13 +147,10 @@
     <ClCompile Include="code\title.cpp">
       <Filter>ソース ファイル\scene</Filter>
     </ClCompile>
-    <ClCompile Include="code\tutorial.cpp">
-      <Filter>ソース ファイル\scene</Filter>
-    </ClCompile>
     <ClCompile Include="code\scene.cpp">
       <Filter>ソース ファイル\scene</Filter>
     </ClCompile>
-    <ClCompile Include="code\ranking.cpp">
+    <ClCompile Include="code\result.cpp">
       <Filter>ソース ファイル\scene</Filter>
     </ClCompile>
     <ClCompile Include="code\camera.cpp">
@@ -261,6 +252,51 @@
     <ClCompile Include="code\boostEffect.cpp">
       <Filter>ソース ファイル\VFX</Filter>
     </ClCompile>
+    <ClCompile Include="code\life.cpp">
+      <Filter>ソース ファイル\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="code\explosionAttack.cpp">
+      <Filter>ソース ファイル\enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="code\continue.cpp">
+      <Filter>ソース ファイル\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="code\caution.cpp">
+      <Filter>ソース ファイル\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="code\resultBehavior.cpp">
+      <Filter>ソース ファイル\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="code\number.cpp">
+      <Filter>ソース ファイル\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="code\number3D.cpp">
+      <Filter>ソース ファイル\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="code\string2D.cpp">
+      <Filter>ソース ファイル\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="code\missileBehavior.cpp">
+      <Filter>ソース ファイル\enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="code\limit.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="code\checkPointBehavior.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="code\tutorial.cpp">
+      <Filter>ソース ファイル\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="code\guideInput.cpp">
+      <Filter>ソース ファイル\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="code\enemyTutorial.cpp">
+      <Filter>ソース ファイル\enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="code\smoke.cpp">
+      <Filter>ソース ファイル\VFX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code\block.h">
@@ -279,12 +315,6 @@
       <Filter>ソース ファイル</Filter>
     </ClInclude>
     <ClInclude Include="code\motion.h">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="code\number.h">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="code\number3D.h">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
     <ClInclude Include="code\objectX.h">
@@ -377,13 +407,10 @@
     <ClInclude Include="code\title.h">
       <Filter>ソース ファイル\scene</Filter>
     </ClInclude>
-    <ClInclude Include="code\tutorial.h">
-      <Filter>ソース ファイル\scene</Filter>
-    </ClInclude>
     <ClInclude Include="code\scene.h">
       <Filter>ソース ファイル\scene</Filter>
     </ClInclude>
-    <ClInclude Include="code\ranking.h">
+    <ClInclude Include="code\result.h">
       <Filter>ソース ファイル\scene</Filter>
     </ClInclude>
     <ClInclude Include="code\camera.h">
@@ -483,6 +510,51 @@
       <Filter>ソース ファイル\UI</Filter>
     </ClInclude>
     <ClInclude Include="code\boostEffect.h">
+      <Filter>ソース ファイル\VFX</Filter>
+    </ClInclude>
+    <ClInclude Include="code\life.h">
+      <Filter>ソース ファイル\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="code\explosionAttack.h">
+      <Filter>ソース ファイル\enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="code\continue.h">
+      <Filter>ソース ファイル\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="code\caution.h">
+      <Filter>ソース ファイル\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="code\resultBehavior.h">
+      <Filter>ソース ファイル\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="code\number3D.h">
+      <Filter>ソース ファイル\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="code\number.h">
+      <Filter>ソース ファイル\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="code\string2D.h">
+      <Filter>ソース ファイル\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="code\missileBehavior.h">
+      <Filter>ソース ファイル\enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="code\limit.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="code\checkPointBehavior.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="code\tutorial.h">
+      <Filter>ソース ファイル\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="code\guideInput.h">
+      <Filter>ソース ファイル\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="code\enemyTutorial.h">
+      <Filter>ソース ファイル\enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="code\smoke.h">
       <Filter>ソース ファイル\VFX</Filter>
     </ClInclude>
   </ItemGroup>

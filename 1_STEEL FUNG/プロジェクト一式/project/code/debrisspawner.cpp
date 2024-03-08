@@ -1,7 +1,7 @@
 //*****************************************************
 //
 // ”ò‚ÑŽU‚é”j•Ðˆ—[debrisSpawner.cpp]
-// Author:¬Š}Œ´•V
+// Author:ûüŽR“–ç
 //
 //*****************************************************
 
@@ -47,8 +47,6 @@ CDebrisSpawner::~CDebrisSpawner()
 //=====================================================
 HRESULT CDebrisSpawner::Init(void)
 {
-	Load();
-
 	return S_OK;
 }
 
@@ -135,7 +133,7 @@ void CDebrisSpawner::Update(void)
 		rot.y = (float)(rand() % 629 - 314) / 100.0f;
 		rot.z = (float)(rand() % 629 - 314) / 100.0f;
 
-		// ƒGƒtƒFƒNƒg¶¬
+		// ”j•Ð¶¬
 		pObjectX = CDebris::Create(m_pos, nLife, m_apDebris[m_type]->nModelIdx , move, m_apDebris[m_type]->fGravity, m_apDebris[m_type]->bBounce);
 		pObjectX->SetRotation(D3DXVECTOR3(rot.x, rot.y, rot.z));
 	}

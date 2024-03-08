@@ -69,13 +69,16 @@ public:
 	void EnableLighting(bool bLighting) { m_bLighting = bLighting; }
 	void EnableAdd(bool bAdd) { m_bAdd = bAdd; }
 	void EnableNotStop(bool bNotStop);
+	void EnableFog(bool bFog) { m_bFog = bFog; }
+	void EnableCull(bool bCull) { m_bCull = bCull; }
 	void SetAlphaTest(DWORD dValue) { m_dAlpha = dValue; }
+	DWORD GetAlpha(void) { return m_dAlpha; }
 
 protected:
 	void Release(void);	// 個別リリース処理
 
 private:
-	void Delete(void);	// 個別リリース処理
+	void Delete(void);	// 個別削除処理
 
 	static int m_nNumAll;	// 総数
 	int m_nID;	// 自分のID
@@ -91,8 +94,16 @@ private:
 	bool m_bLighting;	// ライティングを有効化するかどうか
 	bool m_bNotStop;	// 止まらないオブジェクトかどうか
 	bool m_bAdd;	// 加算合成するかどうか
+	bool m_bFog;	// フォグをかけるかどうか
+	bool m_bCull;	// カリングするかどうか
 	DWORD m_dAlpha;	// アルファテストの値
 	static CObject *m_apNotStop[NUM_OBJECT];	// 停止中にも動くオブジェクトの配列
 };
+
+namespace Object
+{
+void DeleteObject(CObject **ppObject, int nSize = 1);
+}
+
 
 #endif

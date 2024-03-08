@@ -22,6 +22,7 @@ class CObject3D;
 class CEnemy;
 class CHeat;
 class CBoostEffect;
+class COrbit;
 
 //*****************************************************
 // クラスの定義
@@ -43,6 +44,11 @@ public:
 		MOTION_GRAB,	// 掴みモーション
 		MOTION_THROW,	// 投げモーション
 		MOTION_STAMP,	// 踏みつけモーション
+		MOTION_DEATH,	// 死亡モーション
+		MOTION_NEUTRAL_TITLE,	// タイトル待機
+		MOTION_LAUNCH,	// 出撃
+		MOTION_DODGE,	// 回避
+		MOTION_APPER,	// 出現
 		MOTION_MAX
 	};
 	enum STATE
@@ -88,14 +94,17 @@ public:
 	bool IsTargetLock(void) { return m_info.bLockTarget; }
 	void EnableLock(bool bLock) { m_info.bLockTarget = bLock; }
 	float GetBoost(void) { return m_info.fBoost; }
+	float GetLife(void) { return m_info.fLife; }
 	SParam GetParam(void) { return m_param; }
 	STATEBOOST GetStateBoost(void) { return m_info.stateBoost; }
+	bool IsLock(void) { return m_info.bLockTarget; }
 
 private:
 	struct SFragMotion
 	{
 		bool bMove;	// 移動
 		bool bJump;	// ジャンプ
+		bool bDodge;	// 回避
 		bool bStamp;	// 踏みつけ
 		bool bShot;	// 射撃
 		bool bMelee;	// 近接攻撃
@@ -129,8 +138,10 @@ private:
 		int nNumThruster;	// スラスターの数
 		bool bLockTarget;	// ターゲットロックするかどうか
 		bool bLand;	// 着地しているかどうか
+		bool bMelee;	// 近接攻撃が当たったかどうか
 		CEnemy *pEnemyGrab;	// 掴んでいる敵
 		D3DXVECTOR3 rotDest;	// 目標の向き
+		COrbit *pOrbitWeapon;	// 武器の軌跡
 	};
 
 	void Load(void);
@@ -158,6 +169,7 @@ private:
 	void AddBoost(float fValue);
 	void ToggleLockTarget(void);
 	void AddMoveStamp(void);
+	void Death(void);
 	void Debug(void);
 
 	SInfo m_info;	// 自身の情報

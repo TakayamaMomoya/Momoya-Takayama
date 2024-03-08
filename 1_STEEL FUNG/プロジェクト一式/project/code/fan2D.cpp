@@ -14,6 +14,7 @@
 #include "texture.h"
 #include "universal.h"
 #include "debugproc.h"
+#include "UIManager.h"
 
 //*****************************************************
 // 定数定義
@@ -183,6 +184,16 @@ void CFan2D::SetVtx(void)
 //=====================================================
 void CFan2D::Draw(void)
 {
+	bool bDisp = true;
+
+	CUIManager *pUIManager = CUIManager::GetInstance();
+
+	if (pUIManager != nullptr)
+		bDisp = pUIManager->IsDisp();
+
+	if (!bDisp)
+		return;
+
 	// デバイスの取得
 	LPDIRECT3DDEVICE9 pDevice = CRenderer::GetInstance()->GetDevice();
 

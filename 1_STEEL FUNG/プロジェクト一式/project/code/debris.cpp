@@ -1,7 +1,7 @@
 //*****************************************************
 //
 // ”j•Ðˆ—[debris.cpp]
-// Author:¬Š}Œ´•V
+// Author:ûüŽR“–ç
 //
 //*****************************************************
 
@@ -64,11 +64,7 @@ HRESULT CDebris::Init(void)
 	// ƒ‚ƒfƒ‹“Çž
 	if (m_nModelType == TYPE_WALL)
 	{
-		nIdx = CModel::Load("data\\MODEL\\debris\\wood00.x");
-	}
-	else if (m_nModelType == TYPE_SOIL)
-	{
-		nIdx = CModel::Load("data\\MODEL\\debris\\soil00.x");
+		nIdx = CModel::Load("data\\MODEL\\other\\debris.x");
 	}
 
 	BindModel(nIdx);
@@ -107,45 +103,6 @@ void CDebris::Update(void)
 	// ˆÚ“®—Ê‚ÌŒ¸Š
 	m_move.x *= 0.98f;
 	m_move.z *= 0.98f;
-
-
-	if (m_bBounce == true)
-	{
-		if (pos.y > GEOWND)
-		{
-			// ‰ñ“]
-			D3DXVECTOR3 rot = GetRotation();
-			rot.x += m_rotVelocity.x * ROT_VELOCITY;
-			rot.y += m_rotVelocity.y * ROT_VELOCITY;
-			rot.z += m_rotVelocity.z * ROT_VELOCITY;
-			SetRotation(rot);
-		}
-		else
-		{
-			pos.y = GEOWND;
-
-			if (m_move.x < 0.4f && m_move.z < 0.4f)
-			{
-				m_move.x = 0.0f;
-				m_move.z = 0.0f;
-			}
-			else
-			{
-				m_move.y += BOUNCE;
-			}
-		}
-	}
-	else
-	{
-		if (m_move.x < 0.4f && m_move.z < 0.4f || pos.y < GEOWND)
-		{
-			m_move.x = 0.0f;
-			m_move.y = 0.0f;
-			m_move.z = 0.0f;
-
-			pos.y = GEOWND;
-		}
-	}
 
 	// k‚Ü‚¹‚é‚©‚Ì”»’è
 	float fSpeed = sqrtf(m_move.x * m_move.x + m_move.z * m_move.z);

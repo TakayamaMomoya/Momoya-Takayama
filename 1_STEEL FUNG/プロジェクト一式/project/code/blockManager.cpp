@@ -220,6 +220,7 @@ void CBlockManager::LoadMap(FILE *pFile, char *pTemp)
 					if (m_pInfoBlock[nIdx].bSnag == false)
 					{
 						pBlock->DeleteCollision();
+						pBlock->EnableShadow(false);
 					}
 				}
 

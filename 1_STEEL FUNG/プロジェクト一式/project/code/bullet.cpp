@@ -21,6 +21,8 @@
 #include "object3D.h"
 #include "debugproc.h"
 #include "slow.h"
+#include "anim3D.h"
+#include "animEffect3D.h"
 
 //*****************************************************
 // 定数定義
@@ -53,6 +55,7 @@ CBullet::CBullet(int nPriority) : CObject(nPriority)
 	m_pCollisionSphere = nullptr;
 	m_pObject3D = nullptr;
 	m_nIdxPlayer = -1;
+	m_fLengthDest = 0.0f;
 
 	// 総数カウントアップ
 	m_nNumAll++;
@@ -102,6 +105,8 @@ HRESULT CBullet::Init(void)
 			m_pObject3D->SetIdxTexture(nIdx);
 			m_pObject3D->SetColor(m_col);
 			m_pObject3D->EnableAdd(true);
+			m_pObject3D->SetFactSB(100.0f);
+			m_pObject3D->SetAlphaTest(60);
 		}
 	}
 
@@ -252,6 +257,18 @@ bool CBullet::BulletHit(CCollision::TAG tag)
 
 			// 当たったオブジェクトのヒット処理
 			pObj->Hit(m_fDamage);
+
+			// ダメージエフェクトの生成
+			CAnimEffect3D *pAnim3D = CAnimEffect3D::GetInstance();
+
+			if (pAnim3D != nullptr)
+			{
+				D3DXVECTOR3 pos = GetPosition();
+
+				pAnim3D->CreateEffect(pos, CAnimEffect3D::TYPE::TYPE_HIT00);
+			}
+
+			Sound::Play(CSound::LABEL_SE_HIT00);
 		}
 	}
 

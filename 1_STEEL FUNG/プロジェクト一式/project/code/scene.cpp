@@ -9,10 +9,10 @@
 // インクルード
 //*****************************************************
 #include "scene.h"
-#include "tutorial.h"
 #include "game.h"
 #include "title.h"
-#include "ranking.h"
+#include "tutorial.h"
+#include "result.h"
 #include "manager.h"
 #include "renderer.h"
 
@@ -95,9 +95,9 @@ CScene *CScene::Create(MODE mode)
 		pScene = new CGame;
 
 		break;
-	case CScene::MODE_RANKING:
+	case CScene::MODE_RESULT:
 
-		pScene = new CRanking;
+		pScene = new CResult;
 
 		break;
 	default:

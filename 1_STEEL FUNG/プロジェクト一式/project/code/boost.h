@@ -32,6 +32,7 @@ public:
 
 private:
 	CFan2D *m_pObjectGauge;	// ゲージのポインタ
+	CFan2D *m_pObjectFrame;	// フレームのポインタ
 };
 
 #endif

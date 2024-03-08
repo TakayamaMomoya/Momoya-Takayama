@@ -17,7 +17,7 @@ class CObject3D;
 namespace Boss
 {
 const float RADIUS_COLLISION = 300.0f;	// 当たり判定の半径
-const float INITIAL_LIFE = 40.0f;	// 初期体力
+const float INITIAL_LIFE = 75.0f;	// 初期体力
 }
 
 //*****************************************************
@@ -56,6 +56,11 @@ public:
 		MOTION_PRE_SLASH,	// 斬撃予備
 		MOTION_DEATH,	// 死亡モーション
 		MOTION_BEAMSMALL,	// 小ビーム
+		MOTION_JUMP,	// 飛び上がり
+		MOTION_RADIATION,	// 放熱
+		MOTION_PRE_AIRBEAM,	// 空中ビーム予備動作
+		MOTION_LAST_SHOOTING,	// ラストシューティングモーション
+		MOTION_AFTER_DEATH,	// 死後
 		MOTION_MAX
 	};
 
@@ -71,7 +76,8 @@ public:
 	void Hit(float fDamage);
 	void ChangeState(CStateBoss *pNext);
 	void Event(EVENT_INFO *pEventInfo);
-	void AimPlayer(float fSpeed = 500.0f,bool bPridict = true);
+	void AimPlayer(float fSpeed = 500.0f, bool bPridict = true, float fFact = 0.15f);
+	void AimPlayerFlat(float fSpeed = 500.0f, bool bPridict = true, float fFact = 0.15f, D3DXVECTOR3 rotAdd = { 0.0f,0.0f,0.0f });
 	void Back(void);
 	void EnableTrans(bool bTrans) { m_info.bTrans = bTrans; }
 	void BeamBlade(void);
@@ -93,6 +99,7 @@ private:
 	void ManageCollision(void);
 	void FollowCollision(void);
 	bool FollowDest(void);
+	void Wait(void) override {};
 
 	static CEnemyBoss *m_pEnemyBoss;	// 自身のポインタ
 	Sinfo m_info;	// 自身の情報

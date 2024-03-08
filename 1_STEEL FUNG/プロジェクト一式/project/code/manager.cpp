@@ -27,6 +27,9 @@
 #include "fade.h"
 #include "inputManager.h"
 #include "block.h"
+#include "debrisSpawner.h"
+#include "saveDataManager.h"
+#include "checkPointManager.h"
 
 //*****************************************************
 // 静的メンバ変数宣言
@@ -34,8 +37,8 @@
 CCamera *CManager::m_pCamera = nullptr;	// カメラのポインタ
 CLight *CManager::m_pLight = nullptr;	// ライトのポインタ
 CScene *CManager::m_pScene = nullptr;	// シーンへのポインタ
-CScene::MODE CManager::m_mode = CScene::MODE_GAME;	// 現在のモード
-int CManager::m_nScore = 0;	// スコア保存用t
+CScene::MODE CManager::m_mode = CScene::MODE_TITLE;	// 現在のモード
+int CManager::m_nScore = 0;	// スコア保存用
 float CManager::m_fDeltaTime = 0.0f;	// 前回のフレームから経過した時間
 
 //=====================================================
@@ -108,6 +111,12 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	// パーティクルの読込
 	CParticle::Load();
 
+	// 破片スポナーの読込
+	CDebrisSpawner::Load();
+
+	// セーブデータ管理生成
+	CSaveDataManager::Create();
+
 	SetMode(m_mode);
 
 	return S_OK;
@@ -118,6 +127,8 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 //=====================================================
 void CManager::Uninit(void)
 {
+	CheckPoint::SetProgress(0);
+
 	if (m_pScene != nullptr)
 	{
 		m_pScene->Uninit();
@@ -134,12 +145,23 @@ void CManager::Uninit(void)
 	// パーティクル情報破棄
 	CParticle::Unload();
 
+	// 破片スポナー破棄
+	CDebrisSpawner::Unload();
+
 	// レンダラー終了
 	CRenderer *pRenderer = CRenderer::GetInstance();
 
 	if (pRenderer != nullptr)
 	{
 		pRenderer->Uninit();
+	}
+
+	// セーブデータ終了
+	CSaveDataManager *pSave = CSaveDataManager::GetInstance();
+
+	if (pSave != nullptr)
+	{
+		pSave->Uninit();
 	}
 
 	// 入力マネージャー終了

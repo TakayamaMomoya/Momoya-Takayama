@@ -93,6 +93,7 @@ public:
 	void SetMove(D3DXVECTOR3 move) { m_move = move; }
 	D3DXVECTOR3 GetMove(void) { return m_move; }	// éÊìæèàóù
 	void SetRotation(D3DXVECTOR3 rot) { m_rot = rot; }
+	void Rotation(D3DXVECTOR3 rot) { m_rot += rot; }
 	D3DXVECTOR3 GetRotation(void) { return m_rot; }
 	void SetMotion(int nMotionType);
 	int GetMotion(void) { return m_motionType; }

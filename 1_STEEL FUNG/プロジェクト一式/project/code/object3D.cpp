@@ -26,6 +26,7 @@ CObject3D::CObject3D(int nPriority) : CObject(nPriority)
 	m_rot = { 0.0f,0.0f,0.0f };
 	m_width = 0.0f;
 	m_heigth = 0.0f;
+	m_fFactSB = 0.0f;
 	m_pVtxBuff = nullptr;
 	m_nIdxTexture = -1;
 }
@@ -231,6 +232,18 @@ void CObject3D::SetVtxStretchBillboard(void)
 
 	// 法線正規化
 	D3DXVec3Normalize(&nor, &nor);
+
+	// 横幅をずらす計算
+	D3DXVECTOR3 vecSide;
+
+	D3DXVec3Cross(&vecSide, &nor, &-vecPolygon);
+
+	D3DXVec3Normalize(&vecSide, &vecSide);
+
+	vecSide *= m_fFactSB;
+
+	vecFront -= vecSide;
+	vecRear += vecSide;
 
 	//頂点座標の設定
 	pVtx[1].pos = vecFront + nor * m_width;

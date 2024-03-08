@@ -17,6 +17,7 @@
 #include "texture.h"
 #include "fade.h"
 #include "game.h"
+#include "checkPointManager.h"
 #include "sound.h"
 
 //*****************************************************
@@ -109,6 +110,7 @@ HRESULT CPause::Init(void)
 
 	char *pPath[MENU_MAX] = 
 	{// メニュー項目のパス
+		"data\\TEXTURE\\UI\\menu_return.png",
 		"data\\TEXTURE\\UI\\menu_resume.png",
 		"data\\TEXTURE\\UI\\menu_retry.png",
 		"data\\TEXTURE\\UI\\menu_quit.png",
@@ -145,6 +147,8 @@ HRESULT CPause::Init(void)
 	m_state = STATE_IN;
 
 	m_aPosDest[0].x = MENU_WIDTH;
+
+	EnableNotStop(true);
 
 	return S_OK;
 }
@@ -357,6 +361,13 @@ void CPause::Input(void)
 	if (pInputManager->GetTrigger(CInputManager::BUTTON_AXIS_UP))
 	{
 		m_menu = (MENU)((m_menu + MENU_MAX - 1) % MENU_MAX);
+		
+		if (pSound != nullptr && m_bSound == false)
+		{
+			pSound->Play(pSound->LABEL_SE_PAUSE_ARROW);
+
+			m_bSound = true;
+		}
 	}
 
 	if (m_apMenu[m_menu] != nullptr)
@@ -389,6 +400,12 @@ void CPause::Fade(MENU menu)
 
 	switch (menu)
 	{
+	case CPause::MENU_RETRY_FROM_CHECKPOINT:
+
+		CGame::SetState(CGame::STATE_END);
+		pFade->SetFade(CScene::MODE_GAME);
+
+		break;
 	case CPause::MENU_RESUME:
 
 		m_state = STATE_OUT;
@@ -399,6 +416,8 @@ void CPause::Fade(MENU menu)
 
 		CGame::SetState(CGame::STATE_END);
 		pFade->SetFade(CScene::MODE_GAME);
+
+		CheckPoint::SetProgress(0);
 
 		break;
 	case CPause::MENU_QUIT:

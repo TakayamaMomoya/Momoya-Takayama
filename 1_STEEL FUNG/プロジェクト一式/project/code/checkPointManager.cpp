@@ -9,7 +9,9 @@
 // インクルード
 //*****************************************************
 #include "checkPointManager.h"
-#include "object2D.h"
+#include "checkPointBehavior.h"
+#include "saveDataManager.h"
+#include "UI.h"
 #include "texture.h"
 #include "player.h"
 #include "fade.h"
@@ -18,6 +20,9 @@
 #include "enemyBoss.h"
 #include "debugproc.h"
 #include <stdio.h>
+#include "cameraBehavior.h"
+#include "camera.h"
+#include "UIManager.h"
 
 //*****************************************************
 // 定数定義
@@ -27,7 +32,6 @@ namespace
 const char* FILE_PATH = "data\\TEXT\\checkPoint.txt";	// ファイルのパス
 const float SIZE_CURSOR = 20.0f;	// カーソルサイズ
 const char* CURSOR_PATH = "data\\TEXTURE\\UI\\checkPoint00.png";	// カーソルのテクスチャ
-const float DIST_PROGRESS = 1000.0f;	// 進行する距離
 const D3DXVECTOR3 BOSSBATTLE_POS_PLAYER = { 0.0f,0.0f,-2000.0f };	// ボス戦移行時のプレイヤー位置
 }
 
@@ -44,7 +48,7 @@ CCheckPointManager::CCheckPointManager()
 	m_nProgress = 0;
 	m_nNumCheckPoint = 0;
 	m_pPosCheckPoint = nullptr;
-	m_pCursor = nullptr;
+	m_pBehavior = nullptr;
 }
 
 //=====================================================
@@ -80,7 +84,7 @@ CCheckPointManager *CCheckPointManager::GetInstance(void)
 {
 	if (m_pCheckPointManager == nullptr)
 	{
-		Create();
+		//Create();
 	}
 
 	return m_pCheckPointManager;
@@ -94,28 +98,39 @@ HRESULT CCheckPointManager::Init(void)
 	// 読込
 	Load();
 
-	CEnemyManager *pEnemyManager = CEnemyManager::GetInstance();
+	// セーブデータの取得
+	CSaveDataManager *pSave = CSaveDataManager::GetInstance();
 
-	if (pEnemyManager != nullptr)
+	if (pSave != nullptr)
 	{
-		pEnemyManager->SpawnGroup(m_nProgress);
-	}
+		m_nProgress = pSave->GetProgress() - 1;
 
+		CPlayer *pPlayer = CPlayer::GetInstance();
 
-	if (m_pCursor == nullptr)
-	{// カーソル生成
-		m_pCursor = CObject2D::Create(7);
-
-		if (m_pCursor != nullptr)
+		if (pPlayer != nullptr)
 		{
-			m_pCursor->SetSize(SIZE_CURSOR, SIZE_CURSOR);
-			m_pCursor->SetPosition(D3DXVECTOR3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f));
-			int nIdx = CTexture::GetInstance()->Regist(CURSOR_PATH);
-			m_pCursor->SetIdxTexture(nIdx);
-			m_pCursor->SetVtx();
+			D3DXVECTOR3 pos = m_pPosCheckPoint[m_nProgress + 1];
+
+			pPlayer->SetPosition(pos);
+			
+			if (m_nProgress == -1)
+			{
+				pPlayer->SetMotion(CPlayer::MOTION_APPER);
+
+				Camera::ChangeBehavior(new CApperPlayer);
+
+				CUIManager *pUIManager = CUIManager::GetInstance();
+
+				if (pUIManager != nullptr)
+				{
+					pUIManager->EnableDisp(false);
+				}
+			}
 		}
 	}
 
+	ChangeBehavior(new CCheckPointMove);
+	
 	return S_OK;
 }
 
@@ -236,10 +251,11 @@ void CCheckPointManager::Uninit(void)
 		m_pPosCheckPoint = nullptr;
 	}
 
-	if (m_pCursor != nullptr)
+	if (m_pBehavior != nullptr)
 	{
-		m_pCursor->Uninit();
-		m_pCursor = nullptr;
+		m_pBehavior->Uninit(this);
+		delete m_pBehavior;
+		m_pBehavior = nullptr;
 	}
 
 	Release();
@@ -261,79 +277,22 @@ void CCheckPointManager::Update(void)
 			if (state == CFade::FADE::FADE_OUT)
 			{// ボス敵へ移行
 				TransBossBattle();
+
+				if (m_pBehavior != nullptr)
+				{
+					m_pBehavior->Uninit(this);
+					delete m_pBehavior;
+					m_pBehavior = nullptr;
+				}
 			}
 		}
 
 		return;
 	}
 
-	D3DXVECTOR3 posNext = m_pPosCheckPoint[m_nProgress + 1];
-
-	// カーソルの表示
-	if (m_pCursor != nullptr)
+	if (m_pBehavior != nullptr)
 	{
-		D3DXMATRIX mtx;
-		D3DXVECTOR3 posScreen;
-
-		bool bInScreen = universal::IsInScreen(posNext, mtx, &posScreen);
-		
-		if (bInScreen == false)
-		{
-			// 画面内に入らないように設定
-			if (posScreen.x > -SIZE_CURSOR && posScreen.x < SCREEN_WIDTH + SIZE_CURSOR)
-			{
-				posScreen.x = -SIZE_CURSOR;
-			}
-
-			if (posScreen.y > -SIZE_CURSOR && posScreen.y < SCREEN_HEIGHT + SIZE_CURSOR)
-			{
-				posScreen.y = -SIZE_CURSOR;
-			}
-		}
-
-		m_pCursor->SetPosition(posScreen);
-		m_pCursor->SetVtx();
-	}
-
-	CPlayer *pPlayer = CPlayer::GetInstance();
-
-	if (pPlayer != nullptr)
-	{// 距離の計算
-		D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
-		D3DXVECTOR3 vecDiff = posNext - posPlayer;
-
-		float fDist = D3DXVec3Length(&vecDiff);
-
-		if (fDist < DIST_PROGRESS)
-		{
-			m_nProgress++;
-
-			CEnemyManager *pEnemyManager = CEnemyManager::GetInstance();
-
-			if (pEnemyManager != nullptr)
-			{
-				if (m_nProgress > 0)
-				{
-					pEnemyManager->SpawnGroup(m_nProgress);
-				}
-			}
-
-			if (m_nProgress >= m_nNumCheckPoint - 1)
-			{// 最後のチェックポイントに到着
-				CFade *pFade = CFade::GetInstance();
-
-				if (pFade != nullptr)
-				{
-					pFade->SetFade(CScene::MODE_RANKING,false);
-
-					if (m_pCursor != nullptr)
-					{
-						m_pCursor->Uninit();
-						m_pCursor = nullptr;
-					}
-				}
-			}
-		}
+		m_pBehavior->Update(this);
 	}
 }
 
@@ -358,17 +317,8 @@ void CCheckPointManager::TransBossBattle(void)
 
 		if (pEnemyBoss != nullptr)
 		{
-			pEnemyBoss->SetPosition(D3DXVECTOR3(22000.0f,1000.0f,0.0f));
+			pEnemyBoss->SetPosition(D3DXVECTOR3(22000.0f,0.0f,0.0f));
 		}
-	}
-
-	// プレイヤーの位置設定
-	CPlayer *pPlayer = CPlayer::GetInstance();
-
-	if (pPlayer != nullptr)
-	{
-		//pPlayer->SetPosition(BOSSBATTLE_POS_PLAYER);
-		//pPlayer->SetPositionOld(BOSSBATTLE_POS_PLAYER);
 	}
 }
 
@@ -382,4 +332,86 @@ void CCheckPointManager::Draw(void)
 	CDebugProc::GetInstance()->Print("\n進行状況[%d]", m_nProgress);
 
 #endif
+}
+
+//=====================================================
+// チェックポイント位置取得
+//=====================================================
+D3DXVECTOR3 CCheckPointManager::GetCheckPosition(int nProgress)
+{
+	D3DXVECTOR3 pos = { 0.0f,0.0f,0.0f };
+
+	if (m_pPosCheckPoint == nullptr)
+		return pos;
+
+	if (nProgress == -1)
+	{
+		pos = m_pPosCheckPoint[m_nProgress];
+	}
+	else
+	{
+		pos = m_pPosCheckPoint[nProgress];
+	}
+
+	return pos;
+}
+
+//=====================================================
+// 進行度加算
+//=====================================================
+void CCheckPointManager::AddProgress(void)
+{
+	m_nProgress++;
+
+	CEnemyManager *pEnemyManager = CEnemyManager::GetInstance();
+
+	if (pEnemyManager != nullptr)
+	{
+		if (m_nProgress > 0)
+		{
+			pEnemyManager->SpawnGroup(m_nProgress);
+		}
+	}
+
+	if (m_nProgress >= m_nNumCheckPoint - 1)
+	{// 最後のチェックポイントに到着
+		CFade *pFade = CFade::GetInstance();
+
+		if (pFade != nullptr)
+		{
+			pFade->SetFade(CScene::MODE_RESULT, false);
+		}
+	}
+}
+
+//=====================================================
+// ビヘイビア変更
+//=====================================================
+void CCheckPointManager::ChangeBehavior(CCheckPointBehavior *pBehavior)
+{
+	if (m_pBehavior != nullptr)
+	{
+		m_pBehavior->Uninit(this);
+		delete m_pBehavior;
+	}
+
+	m_pBehavior = pBehavior;
+
+	if (m_pBehavior != nullptr)
+	{
+		m_pBehavior->Init(this);
+	}
+}
+
+namespace CheckPoint
+{
+void SetProgress(int nProgress)
+{
+	CCheckPointManager *pCheck = CCheckPointManager::GetInstance();
+
+	if (pCheck != nullptr)
+	{
+		pCheck->SetProgress(nProgress);
+	}
+}
 }

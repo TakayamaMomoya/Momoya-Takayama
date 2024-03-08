@@ -16,7 +16,7 @@
 //*****************************************************
 // 前方宣言
 //*****************************************************
-class CTutorialManager;
+class CUI;
 
 //*****************************************************
 // クラスの定義
@@ -33,7 +33,12 @@ public:
 	virtual void Draw();
 
 private:
+	void SpawnEnemy(void);
+	void InputSkip(void);
 
+	float m_fSpawnCnt;
+	float m_fCntSkip;	// スキップカウンター
+	CUI *m_pSkipGauge;	// スキップゲージ
 };
 
 #endif

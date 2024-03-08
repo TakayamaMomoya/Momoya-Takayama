@@ -85,7 +85,7 @@ void LimitPosInSq(float fWidth, float fHeight, D3DXVECTOR3 *pPos)
 }
 
 //========================================
-// 球の距離制限
+// 円柱の距離制限
 //========================================
 float LimitDistCylinder(float fLength, D3DXVECTOR3 *pPos, D3DXVECTOR3 posTarget)
 {
@@ -110,6 +110,57 @@ float LimitDistCylinder(float fLength, D3DXVECTOR3 *pPos, D3DXVECTOR3 posTarget)
 	}
 
 	return fDistDiff;
+}
+
+//========================================
+// 球の距離制限（内側）
+//========================================
+float LimitDistSphereInSide(float fLength, D3DXVECTOR3 *pPos, D3DXVECTOR3 posTarget)
+{
+	if (pPos == nullptr)
+		return 0.0f;
+
+	D3DXVECTOR3 vecDiff = posTarget - *pPos;
+
+	float fDistDiff = D3DXVec3Length(&vecDiff);
+
+	if (fLength <= fDistDiff)
+	{
+		fDistDiff = fLength;
+
+		D3DXVec3Normalize(&vecDiff, &vecDiff);
+
+		vecDiff *= fLength;
+
+		*pPos = posTarget - vecDiff;
+	}
+
+	return fDistDiff;
+}
+
+//========================================
+// ホーミング
+//========================================
+void Horming(D3DXVECTOR3 pos, D3DXVECTOR3 posTarget, float fSpeedChase, D3DXVECTOR3 *pMove)
+{
+	if (pMove == nullptr)
+		return;
+
+	D3DXVECTOR3 vecDiff = posTarget - pos;
+
+	VecConvertLength(&vecDiff, fSpeedChase);
+
+	*pMove += vecDiff;
+}
+
+//========================================
+// ベクトルを長さで補正する処理
+//========================================
+void VecConvertLength(D3DXVECTOR3 *pVec, float fLength)
+{
+	D3DXVec3Normalize(pVec, pVec);
+
+	*pVec *= fLength;
 }
 
 //========================================
@@ -527,5 +578,37 @@ int RandRange(int nMax, int nMin)
 	int nRand = rand() % nRange + nMin;
 
 	return nRand;
+}
+
+//========================================
+// RGBをD3DXCOLORに変換する処理
+//========================================
+D3DXCOLOR ConvertRGB(BYTE r, BYTE g, BYTE b, BYTE a)
+{
+	D3DXCOLOR col;
+
+	col =
+	{
+		(float)r / 255.0f,
+		(float)g / 255.0f,
+		(float)b / 255.0f,
+		(float)a / 255.0f,
+	};
+
+	return col;
+}
+
+//========================================
+// 3D座標の線形補完
+//========================================
+D3DXVECTOR3 Lerp(D3DXVECTOR3 start, D3DXVECTOR3 end, float fTime)
+{
+	D3DXVECTOR3 pos = start;
+
+	D3DXVECTOR3 vecDiff = end - start;
+
+	pos += vecDiff * fTime;
+
+	return pos;
 }
 }	// namespace universal

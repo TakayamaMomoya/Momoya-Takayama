@@ -1,7 +1,7 @@
 //*****************************************************
 //
 // ”ò‚ÑŽU‚é”j•Ðˆ—[debrisSpawner.h]
-// Author:¬Š}Œ´•V
+// Author:ûüŽR“–ç
 //
 //*****************************************************
 
@@ -23,8 +23,7 @@ public:
 	enum TYPE
 	{
 		TYPE_NONE = 0,	// ‰½‚Å‚à‚È‚¢
-		TYPE_WALL,	// •Ç
-		TYPE_SOIL,	// “y
+		TYPE_DEATH,	// Ž€–SŽž
 		TYPE_MAX
 	};
 

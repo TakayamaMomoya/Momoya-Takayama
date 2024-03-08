@@ -957,7 +957,7 @@ void CMeshField::Save(void)
 	FILE *pFile;
 
 	//ファイルを開く
-	pFile = fopen("data\\MAP\\field01.bin", "wb");
+	pFile = fopen("data\\MAP\\field00.bin", "wb");
 
 	if (pFile != nullptr)
 	{

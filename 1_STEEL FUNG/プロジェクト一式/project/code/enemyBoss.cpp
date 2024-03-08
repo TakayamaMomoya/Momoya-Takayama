@@ -18,6 +18,8 @@
 #include "game.h"
 #include "bullet.h"
 #include "effect3D.h"
+#include "anim3D.h"
+#include "animEffect3D.h"
 #include "sound.h"
 #include "frame.h"
 #include "particle.h"
@@ -26,6 +28,8 @@
 #include "slow.h"
 #include "fade.h"
 #include "camera.h"
+#include "inputkeyboard.h"
+#include "sound.h"
 
 //*****************************************************
 // 定数定義
@@ -88,13 +92,13 @@ CEnemyBoss *CEnemyBoss::Create(void)
 //=====================================================
 HRESULT CEnemyBoss::Init(void)
 {
+	SetType(TYPE_BOSS);
+
 	CSound *pSound = CSound::GetInstance();
 
 	if (pSound != nullptr)
 	{
-		pSound->Stop();
-
-		//pSound->Play(CSound::LABEL_BGM_BOSS);
+		pSound->SetFade(CSound::LABEL_BGM_GAME, CSound::LABEL_BGM_BOSS00, 0.1f);
 	}
 
 	// フレーム演出の生成
@@ -104,10 +108,12 @@ HRESULT CEnemyBoss::Init(void)
 	CEnemy::Init();
 
 	// 初期の体力設定
-	SetLife(Boss::INITIAL_LIFE);
+	SetLife(Boss::INITIAL_LIFE,true);
 
 	// 状態設定
 	ChangeState(new CStateBossApper);
+
+	SetMoveState(CEnemy::MOVESTATE::MOVESTATE_ATTACK);
 
 	FollowCollision();
 
@@ -176,6 +182,18 @@ void CEnemyBoss::Update(void)
 	universal::LimitPosInSq(23000.0f, 23000.0f,&pos);
 
 	SetPosition(pos);
+
+#ifdef _DEBUG
+	CInputKeyboard *pKeyboard = CInputKeyboard::GetInstance();
+
+	if (pKeyboard != nullptr)
+	{
+		if (pKeyboard->GetTrigger(DIK_Q))
+		{
+			ChangeState(new CStateBossBeamSmall);
+		}
+	}
+#endif // DEBUG
 }
 
 //=====================================================
@@ -190,7 +208,7 @@ void CEnemyBoss::ManageCollision(void)
 //=====================================================
 // プレイヤーを狙う処理
 //=====================================================
-void CEnemyBoss::AimPlayer(float fSpeed, bool bPridict)
+void CEnemyBoss::AimPlayer(float fSpeed, bool bPridict, float fFact)
 {
 	CPlayer *pPlayer = CPlayer::GetInstance();
 
@@ -221,8 +239,51 @@ void CEnemyBoss::AimPlayer(float fSpeed, bool bPridict)
 		// 向きの補正
 		D3DXVECTOR3 rot = GetRotation();
 
-		universal::FactingRot(&rot.x, rotDest.x, 0.15f);
-		universal::FactingRot(&rot.y, rotDest.y, 0.15f);
+		universal::FactingRot(&rot.x, rotDest.x, fFact);
+		universal::FactingRot(&rot.y, rotDest.y, fFact);
+
+		SetRotation(rot);
+	}
+}
+
+//=====================================================
+// プレイヤーを平面で狙う処理
+//=====================================================
+void CEnemyBoss::AimPlayerFlat(float fSpeed, bool bPridict, float fFact, D3DXVECTOR3 rotAdd)
+{
+	CPlayer *pPlayer = CPlayer::GetInstance();
+
+	if (pPlayer != nullptr)
+	{
+		// 目標向きの取得
+		D3DXVECTOR3 pos = GetMtxPos(15);
+
+		D3DXVECTOR3 posPlayer = pPlayer->GetMtxPos(0);
+		D3DXVECTOR3 movePlayer = pPlayer->GetMove();
+		D3DXVECTOR3 posPridiction;
+
+		if (bPridict)
+		{
+			posPridiction = universal::LinePridiction(pos, fSpeed, posPlayer, movePlayer);
+		}
+		else
+		{
+			posPridiction = posPlayer;
+		}
+
+		D3DXVECTOR3 vecDiff = posPridiction - pos;
+
+		D3DXVECTOR3 rotDest = universal::VecToRot(vecDiff);
+		rotDest.x -= D3DX_PI * 0.5f;
+		rotDest.y -= D3DX_PI;
+
+		// 向きの補正
+		D3DXVECTOR3 rot = GetRotation();
+
+		rotDest.y += rotAdd.y;
+
+		universal::FactingRot(&rot.x, 0.0f, fFact);
+		universal::FactingRot(&rot.y, rotDest.y, fFact);
 
 		SetRotation(rot);
 	}
@@ -290,6 +351,77 @@ void CEnemyBoss::BeamBlade(void)
 }
 
 //=====================================================
+// ヒット処理
+//=====================================================
+void CEnemyBoss::Hit(float fDamage)
+{
+	CEnemy::STATE state = CEnemy::GetState();
+
+	if (state != CEnemy::STATE_DAMAGE)
+	{
+		float fLife = CEnemy::GetLife();
+
+		fLife -= fDamage;
+
+		CSound *pSound = CSound::GetInstance();
+
+		if (pSound != nullptr)
+		{// ヒットサウンド
+			//pSound->Play(CSound::LABEL_SE_HIT_BOSS);
+		}
+
+		if (fLife <= 0.0f)
+		{// 死亡状態
+
+			fLife = 0.0f;
+
+			// スコア管理
+			ManageScore();
+
+			// 当たり判定削除
+			DeleteCollision();
+
+			CSlow *pSlow = CSlow::GetInstance();
+
+			if (pSlow != nullptr)
+				pSlow->SetSlowTime(0.5f, 0.1f);
+
+			if (m_info.bTrans == false)
+			{
+				ChangeState(new CStateBossTrans);
+
+				CFade *pFade = CFade::GetInstance();
+
+				if (pFade != nullptr)
+				{
+					pFade->SetFade(CScene::MODE_GAME, false);
+				}
+			}
+			else
+			{
+				ChangeState(new CStateBossDeath);
+
+				if (pSlow != nullptr)
+					pSlow->SetSlowTime(3.0f, 0.1f);
+
+				CCamera *pCamera = CManager::GetCamera();
+
+				if (pCamera != nullptr)
+					pCamera->SetQuake(1.5f, 1.5f, 160);
+			}
+		}
+		else
+		{
+			state = CEnemy::STATE_DAMAGE;
+		}
+
+		CEnemy::SetLife(fLife);
+	}
+
+	CEnemy::SetState(state);
+}
+
+//=====================================================
 // イベントの管理
 //=====================================================
 void CEnemyBoss::Event(EVENT_INFO *pEventInfo)
@@ -307,6 +439,8 @@ void CEnemyBoss::Event(EVENT_INFO *pEventInfo)
 
 	if (nMotion == MOTION_SHOT)
 	{
+		Sound::Play(CSound::LABEL_SE_SHOT04);
+
 		// ビームの生成
 		CBeam *pBeam = CBeam::Create();
 
@@ -350,6 +484,32 @@ void CEnemyBoss::Event(EVENT_INFO *pEventInfo)
 			}
 		}
 	}
+
+	if (nMotion == MOTION_DEATH)
+	{// 大爆発の生成
+		Sound::Play(CSound::LABEL_SE_EXPLOSION00);
+
+		CAnimEffect3D *pAnimEffect = CAnimEffect3D::GetInstance();
+
+		if (pAnimEffect != nullptr)
+		{
+			CAnim3D *pAnim = pAnimEffect->CreateEffect(pos, CAnimEffect3D::TYPE::TYPE_EXPLOSION);
+
+			if (pAnim != nullptr)
+			{
+				pAnim->SetSize(2000.0f, 1400.0f);
+			}
+		}
+	}
+
+	if (nMotion == MOTION_APPER)
+	{// 出現時の煙
+		Sound::Play(CSound::LABEL_SE_LAND00);
+
+		D3DXVECTOR3 posParticle = GetPosition();
+
+		CParticle::Create(posParticle, CParticle::TYPE::TYPE_APPER_SMOKE);
+	}
 }
 
 //=====================================================
@@ -362,12 +522,6 @@ void CEnemyBoss::FollowCollision(void)
 	if (pCollision != nullptr)
 	{
 		D3DXVECTOR3 pos = GetMtxPos(IDX_WAIST);
-
-		pos.y -= 25.0f;
-
-#ifdef _DEBUG
-		//CEffect3D::Create(pos, pCollision->GetRadius(), 10, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
-#endif
 
 		pCollision->SetPositionOld(pCollision->GetPosition());
 		pCollision->SetPosition(pos);
@@ -423,77 +577,6 @@ void CEnemyBoss::ChangeState(CStateBoss *pNext)
 	{
 		m_info.pState->Init(this);
 	}
-}
-
-//=====================================================
-// ヒット処理
-//=====================================================
-void CEnemyBoss::Hit(float fDamage)
-{
-	CEnemy::STATE state = CEnemy::GetState();
-
-	if (state == CEnemy::STATE_NORMAL)
-	{
-		float fLife = CEnemy::GetLife();
-
-		fLife -= fDamage;
-
-		CSound *pSound = CSound::GetInstance();
-
-		if (pSound != nullptr)
-		{// ヒットサウンド
-			//pSound->Play(CSound::LABEL_SE_HIT_BOSS);
-		}
-
-		if (fLife <= 0.0f)
-		{// 死亡状態
-
-			fLife = 0.0f;
-
-			// スコア管理
-			ManageScore();
-
-			// 当たり判定削除
-			DeleteCollision();
-
-			CSlow *pSlow = CSlow::GetInstance();
-
-			if (pSlow != nullptr)
-				pSlow->SetSlowTime(0.5f,0.1f);
-
-			if (m_info.bTrans == false)
-			{
-				ChangeState(new CStateBossTrans);
-
-				CFade *pFade = CFade::GetInstance();
-
-				if (pFade != nullptr)
-				{
-					pFade->SetFade(CScene::MODE_GAME, false);
-				}
-			}
-			else
-			{
-				ChangeState(new CStateBossDeath);
-
-				if (pSlow != nullptr)
-					pSlow->SetSlowTime(3.0f, 0.1f);
-
-				CCamera *pCamera = CManager::GetCamera();
-
-				if (pCamera != nullptr)
-					pCamera->SetQuake(1.5f, 1.5f, 160);
-			}
-		}
-		else
-		{
-			state = CEnemy::STATE_DAMAGE;
-		}
-
-		CEnemy::SetLife(fLife);
-	}
-
-	CEnemy::SetState(state);
 }
 
 //=====================================================

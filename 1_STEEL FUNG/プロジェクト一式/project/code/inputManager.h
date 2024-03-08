@@ -23,6 +23,7 @@ public:
 	{
 		BUTTON_ENTER = 0,	// エンターボタン
 		BUTTON_BACK,	// 戻るボタン
+		BUTTON_SKIP,	// スキップボタン
 		BUTTON_JUMP,	// ジャンプ
 		BUTTON_SHOT,	// 射撃
 		BUTTON_MELEE,	// 近接攻撃

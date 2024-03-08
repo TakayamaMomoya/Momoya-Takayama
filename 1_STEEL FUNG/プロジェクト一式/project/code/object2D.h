@@ -43,7 +43,6 @@ public:
 	D3DXVECTOR3 GetMove(void) { return m_move; }	// ˆÚ“®—Êæ“¾ˆ—
 	void SetRotation(float fRot);// Œü‚«İ’èˆ—
 	float GetRotation(void) { return m_fRot; }	// Œü‚«æ“¾ˆ—
-	void LimitPos(void);	// ˆÚ“®§ŒÀ
 	D3DXCOLOR GetCol(void) { return m_col; }
 	void SetCol(D3DXCOLOR col);
 	float GetWidth(void) { return m_width; }	// ƒTƒCƒYæ“¾

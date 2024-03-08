@@ -20,10 +20,9 @@
 //*****************************************************
 class CMenu;
 class CObject2D;
-
-//*****************************************************
-// 定数定義
-//*****************************************************
+class CMotion;
+class CMotion;
+class CTitleBehavior;
 
 //*****************************************************
 // クラスの定義
@@ -31,15 +30,6 @@ class CObject2D;
 class CTitle : public CScene
 {
 public:
-	CTitle();	// コンストラクタ
-	~CTitle();	// デストラクタ
-
-	virtual HRESULT Init(void);
-	virtual void Uninit(void);
-	virtual void Update(void);
-	virtual void Draw(void);
-
-private:
 	enum STATE
 	{
 		STATE_NONE = 0,	// 何もしてない状態
@@ -47,21 +37,69 @@ private:
 		START_MAX
 	};
 
-	void ManageStart(void);
-	void UpdateFade(void);
-	void SetFadeIn(void);
+	CTitle();	// コンストラクタ
+	~CTitle();	// デストラクタ
 
+	virtual HRESULT Init(void);
+	virtual void Uninit(void);
+	virtual void Update(void);
+	virtual void Draw(void);
+	void ChangeBehavior(CTitleBehavior *pBehavior);
+	STATE GetState(void) { return m_state; }
+
+private:
 	STATE m_state;				// 状態
-
 	CObject2D* m_pLogo;		// タイトルロゴのポインタ
-	CObject2D* m_pLogoLate; // 遅れてくるロゴのポインタ
+	CMotion *m_pMotion;	// プレイヤーモデル
+	CTitleBehavior *m_pBehavior;	// ビヘイビア
+	float m_fTImerSmoke;	// 煙のスポーンタイマー
+};
+
+class CTitleBehavior
+{// 基本ビヘイビア
+public:
+	CTitleBehavior();	// コンストラクタ
+	virtual ~CTitleBehavior();	// デストラクタ
+
+	virtual void Update(CTitle *pTItle) = 0;
+
+private:
+};
+
+class CTitleStart : public CTitleBehavior
+{// スタート表示状態
+public:
+	CTitleStart();	// コンストラクタ
+	virtual ~CTitleStart();	// デストラクタ
+	void Update(CTitle *pTItle) override;
+
+private:
 	CObject2D *m_pStart;	// スタート表示のポインタ
+	CObject2D *m_pAfter;	// スタート表示の残像
+};
 
-	int m_nFadeCnt;			// フェードまでのカウント
-	bool m_bIsAlphaChange;	// α値の変化
+class CTitleMenu : public CTitleBehavior
+{// メニュー
+public:
+	enum MENU
+	{
+		MENU_GAME = 0,	// ゲーム
+		MENU_TRANING,	// 訓練場
+		MENU_MAX
+	};
 
-	float m_fSizeX;			// ロゴのサイズ用
-	float m_fSizeY;			// ロゴのサイズ用
+	CTitleMenu();	// コンストラクタ
+	virtual ~CTitleMenu();	// デストラクタ
+	void Update(CTitle *pTItle) override;
+
+private:
+	void Input(void);
+	void ManageCursor(void);
+	void Fade(void);
+
+	CObject2D *m_apMenu[MENU_MAX];	// メニュー項目
+	CObject2D *m_pCursor;	// カーソル
+	MENU m_menu;	// 選択メニュー項目
 };
 
 #endif

@@ -944,7 +944,7 @@ Mesh {
    0.000000;0.000000;0.000000;;
    0.000000;0.000000;0.000000;;
    TextureFilename {
-    "C:\\Users\\student\\Documents\\Visual Studio 2015\\Projects\\プログラミング応用DirectX\\06_prototype\\data\\TEXTURE\\BG\\sky000.jpg";
+    "data\\TEXTURE\\BG\\sky00.jpg";
    }
   }
  }

@@ -26,8 +26,17 @@
 #include "cameraBehavior.h"
 #include "heat.h"
 #include "particle.h"
+#include "debrisSpawner.h"
 #include "game.h"
 #include "boostEffect.h"
+#include "animEffect3D.h"
+#include "anim3D.h"
+#include "continue.h"
+#include "pause.h"
+#include "inpact.h"
+#include "sound.h"
+#include "UIManager.h"
+#include "orbit.h"
 
 //*****************************************************
 // 定数定義
@@ -39,30 +48,30 @@ const float INITIAL_BOOST = 200.0f;	// ブースト残量の初期値
 const float REGEN_BOOST = 2.5f;	// ブースト回復量
 const float GRAVITY = 0.50f;	// 重力
 const float SPEED_ROLL_CAMERA = 0.03f;	// カメラ回転速度
-const float SPEED_BULLET = 150.0f;	// 弾速
+const float SPEED_BULLET = 200.0f;	// 弾速
 const float POW_JUMP = 20.0f;	// ジャンプ力
 const float POW_STAMP = 30.0f;	// 踏みつけの推進力
 const float SPEED_STAMP = 70.0f;	// 踏みつけ水平推進力
 const float SPEED_MOVE = 1.6f;	// 移動速度
 const float FACT_MOVE = 0.04f;	// 移動の減衰係数
-const float SPEED_ASSAULT = 4.0f;	// 突進の移動速度
-const float POW_ADDMELEE = 50.0f;	// 追撃の推進力
-const float SPEED_DODGE = 50.0f;	// 回避推進力
+const float SPEED_ASSAULT = 7.0f;	// 突進の移動速度
+const float POW_ADDMELEE = 70.0f;	// 追撃の推進力
+const float SPEED_DODGE = 100.0f;	// 回避推進力
 const float POW_GRAB = 50.0f;	// 掴みの推進力
 const float RADIUS_GRAB = 500.0f;	// 掴みの判定
 const float POW_THROW = 200.0f;	// 投げの力
 const float LENGTH_LOCKON = 5000.0f;	// ロックオンの長さ
 const float ANGLE_LOCKON = D3DX_PI * 0.2f;	// ロックオンの角度
-const float MELEE_DIST = 800.0f;	// 格闘に移る距離
-const float MIN_ANGLE_CAMERA = D3DX_PI * 0.2f;	// カメラの下を見る制限
-const float MAX_ANGLE_CAMERA = D3DX_PI * 0.7f;	// カメラの上を見る制限
+const float MELEE_DIST = 500.0f;	// 格闘に移る距離
+const float MIN_ANGLE_CAMERA = D3DX_PI * 0.1f;	// カメラの下を見る制限
+const float MAX_ANGLE_CAMERA = D3DX_PI * 0.9f;	// カメラの上を見る制限
 const float DAMAGE_BULLET = 1.0f;	// 弾の威力
 const float DECREASE_PARAM = 2.0f;	// パラメータ全回復にかかる時間
 const D3DXVECTOR3 POS_PARAM[CPlayer::PARAM_MAX] =
 {// パラメータ表示の位置
-	{SCREEN_WIDTH * 0.5f - 320.0f,SCREEN_HEIGHT * 0.5f - 100.0f,0.0f},// 銃
-	{SCREEN_WIDTH * 0.5f + 320.0f,SCREEN_HEIGHT * 0.5f - 100.0f,0.0f},// 近接
-	{SCREEN_WIDTH * 0.5f + 320.0f,SCREEN_HEIGHT * 0.5f + 100.0f,0.0f},// 掴み
+	{SCREEN_WIDTH * 0.5f - 370.0f,SCREEN_HEIGHT * 0.5f - 100.0f,0.0f},// 銃
+	{SCREEN_WIDTH * 0.5f + 370.0f,SCREEN_HEIGHT * 0.5f - 100.0f,0.0f},// 近接
+	{SCREEN_WIDTH * 0.5f + 370.0f,SCREEN_HEIGHT * 0.5f + 100.0f,0.0f},// 掴み
 };
 const char* PATH_PARAM[CPlayer::PARAM_MAX] =
 {// パラメータUIのテクスチャパス
@@ -70,6 +79,7 @@ const char* PATH_PARAM[CPlayer::PARAM_MAX] =
 	"data\\TEXTURE\\UI\\frame01.png",
 	"data\\TEXTURE\\UI\\frame02.png",
 };
+const int RAND_SHOT = 60;	// 射撃精度のランダム幅
 }
 
 //*****************************************************
@@ -126,6 +136,9 @@ HRESULT CPlayer::Init(void)
 	// 継承クラスの初期化
 	CMotion::Init();
 
+	m_info.rotDest = D3DXVECTOR3(0.0f, 1.57f, 0.0f);
+	SetRotation(D3DXVECTOR3(0.0f, -1.57f, 0.0f));
+
 	// 当たり判定の生成
 	if (m_info.pCollisionSphere == nullptr)
 	{
@@ -172,10 +185,6 @@ HRESULT CPlayer::Init(void)
 	m_info.state = STATE_NORMAL;
 	m_info.stateBoost = STATEBOOST_NORMAL;
 	m_info.bLand = true;
-
-	// 影の有効化
-	SetPosShadow(D3DXVECTOR3(0.0f, 0.5f, 0.0f));
-	EnableShadow(true);
 
 	SetMotion(MOTION_WALK_FRONT);
 
@@ -317,42 +326,17 @@ void CPlayer::Uninit(void)
 {
 	m_pPlayer = nullptr;
 
-	if (m_info.pCollisionSphere != nullptr)
-	{
-		m_info.pCollisionSphere->Uninit();
-		m_info.pCollisionSphere = nullptr;
-	}
-
-	if (m_info.pCollisionCube != nullptr)
-	{
-		m_info.pCollisionCube->Uninit();
-		m_info.pCollisionCube = nullptr;
-	}
-
-	if (m_info.pClsnAttack != nullptr)
-	{
-		m_info.pClsnAttack->Uninit();
-		m_info.pClsnAttack = nullptr;
-	}
-
-	for (int i = 0; i < PARAM_MAX; i++)
-	{
-		if (m_info.apHeatUI[i] != nullptr)
-		{
-			m_info.apHeatUI[i]->Uninit();
-			m_info.apHeatUI[i] = nullptr;
-		}
-	}
+	Object::DeleteObject((CObject**)&m_info.pCollisionSphere);
+	Object::DeleteObject((CObject**)&m_info.pCollisionCube);
+	Object::DeleteObject((CObject**)&m_info.pClsnAttack);
+	Object::DeleteObject((CObject**)&m_info.apHeatUI[0],PARAM_MAX);
+	Object::DeleteObject((CObject**)&m_info.pOrbitWeapon);
 
 	if (m_info.pThruster != nullptr)
 	{
 		for (int i = 0; i < m_info.nNumThruster; i++)
 		{
-			if (m_info.pThruster[i].pFire != nullptr)
-			{
-				m_info.pThruster[i].pFire->Uninit();
-				m_info.pThruster[i].pFire = nullptr;
-			}
+			Object::DeleteObject((CObject**)&m_info.pThruster[i].pFire);
 		}
 	}
 
@@ -367,17 +351,17 @@ void CPlayer::Update(void)
 {
 	CSlow *pSlow = CSlow::GetInstance();
 
-	// 継承クラスの更新
-	CMotion::Update();
-
 	// ロックオン
 	Lockon();
 
-	// 入力
-	Input();
+	if (m_info.state != CPlayer::STATE::STATE_DEATH && GetMotion() != MOTION_APPER)
+	{
+		// 入力
+		Input();
 
-	// プレイヤーの回転
-	Rotation();
+		// プレイヤーの回転
+		Rotation();
+	}
 
 	// 位置の反映
 	D3DXVECTOR3 pos = GetPosition();
@@ -408,6 +392,7 @@ void CPlayer::Update(void)
 		nMotion != MOTION_MELEE2 &&
 		nMotion != MOTION_GRAB &&
 		nMotion != MOTION_THROW &&
+		nMotion != MOTION_DODGE &&
 		m_fragMotion.bStamp == false)
 	{
 		if (pSlow != nullptr)
@@ -421,17 +406,33 @@ void CPlayer::Update(void)
 		}
 		else
 		{
+			float fScale = pSlow->GetScale();
+
 			move.x *= FACT_MOVE;
 			move.z *= FACT_MOVE;
 
-			move.y -= GRAVITY;
+			move.y -= GRAVITY * fScale;
 		}
 	}
 	else
 	{
-		move.x += (0 - move.x) * 0.05f;
-		move.y += (0 - move.y) * 0.5f;
-		move.z += (0 - move.z) * 0.05f;
+		if (nMotion == MOTION_DODGE)
+		{
+			move.x += (0 - move.x) * 0.02f;
+			move.y += (0 - move.y) * 0.5f;
+			move.z += (0 - move.z) * 0.02f;
+		}
+		else
+		{
+			move.x += (0 - move.x) * 0.05f;
+			move.y += (0 - move.y) * 0.1f;
+			move.z += (0 - move.z) * 0.05f;
+		}
+	}
+
+	if (move.y > 24.0f)
+	{// 上昇力制限
+		move.y = 24.0f;
 	}
 
 	SetMove(move);
@@ -484,9 +485,12 @@ void CPlayer::Update(void)
 	// ブーストエフェクト制御
 	Boost();
 
+	// 継承クラスの更新
+	CMotion::Update();
+
 // デバッグ処理
 #if _DEBUG
-
+	Debug();
 #endif // _DEBUG
 }
 
@@ -519,6 +523,19 @@ void CPlayer::Input(void)
 
 	// 攻撃操作
 	InputAttack();
+
+	if (CManager::GetMode() == CScene::MODE_GAME)
+	{
+		CInputManager *pInputManager = CInputManager::GetInstance();
+
+		if (pInputManager != nullptr)
+		{
+			if (pInputManager->GetTrigger(CInputManager::BUTTON_PAUSE))
+			{
+				CPause::Create();
+			}
+		}
+	}
 }
 
 //=====================================================
@@ -558,16 +575,25 @@ void CPlayer::InputMove(void)
 
 	int nMotion = GetMotion();
 
-	if (fLengthAxis >= 0.3f && nMotion != MOTION_SHOT)
+	if ((fLengthAxis >= 0.3f && nMotion != MOTION_SHOT) || nMotion == MOTION_DODGE)
 	{// 通常移動時の目標向き設定
-		m_info.rotDest.y = atan2f(vecInput.x, vecInput.z);
+		if (nMotion == MOTION_DODGE)
+		{
+			D3DXVECTOR3 move = GetMove();
+
+			m_info.rotDest.y = atan2f(move.x, move.z);
+		}
+		else
+		{
+			m_info.rotDest.y = atan2f(vecInput.x, vecInput.z);
+		}
 
 		CDebugProc *pDebugProc = CDebugProc::GetInstance();
 
 		pDebugProc->Print("\n通常移動");
 	}
 
-	if (nMotion == MOTION_SHOT || nMotion == MOTION_ASSAULT || nMotion == MOTION_MELEE || nMotion == MOTION_MELEE2 || nMotion == MOTION_THROW || m_info.bLockTarget)
+	if (nMotion != MOTION_DODGE && (nMotion == MOTION_SHOT || nMotion == MOTION_ASSAULT || nMotion == MOTION_MELEE || nMotion == MOTION_MELEE2 || nMotion == MOTION_THROW || m_info.bLockTarget))
 	{// 敵の方向を向く処理
 		CEnemyManager *pEnemyManager = CEnemyManager::GetInstance();
 
@@ -595,6 +621,7 @@ void CPlayer::InputMove(void)
 		nMotion != MOTION_MELEE2 &&
 		nMotion != MOTION_GRAB &&
 		nMotion != MOTION_THROW &&
+		nMotion != MOTION_DODGE &&
 		m_fragMotion.bStamp == false)
 	{
 		// 方向入力の取得
@@ -644,12 +671,19 @@ void CPlayer::InputMove(void)
 			{// ジャンプ操作
 				m_fragMotion.bJump = true;
 				m_fragMotion.bMove = false;
+
+				Sound::Play(CSound::LABEL_SE_BOOST00);
 			};
 		}
 		else
 		{
 			if (m_info.stateBoost != STATEBOOST_OVERHEAT)
 			{
+				if (pInputManager->GetTrigger(CInputManager::BUTTON_JUMP))
+				{
+					Sound::Play(CSound::LABEL_SE_BOOST00);
+				}
+
 				if (pInputManager->GetPress(CInputManager::BUTTON_JUMP))
 				{// ブースト上昇
 					vecMove.y += 1.0f;
@@ -675,6 +709,10 @@ void CPlayer::InputMove(void)
 				};
 
 				AddBoost(-50.0f);
+
+				m_fragMotion.bDodge = true;
+
+				Sound::Play(CSound::LABEL_SE_DASH00);
 			}
 		}
 
@@ -746,12 +784,10 @@ void CPlayer::Stamp(void)
 				return;
 			}
 
-			CEnemy *pEnemy = pEnemyManager->GetHead();
+			std::list<CEnemy*> listEnemy = pEnemyManager->GetListRanking();
 
-			while (pEnemy != nullptr)
+			for (auto pEnemy : listEnemy)
 			{
-				CEnemy *pEnemyNext = pEnemy->GetNext();
-
 				if ((CObject*)pEnemy == pObj)
 				{
 					bool bStamp = pEnemy->IsStamp();
@@ -770,8 +806,6 @@ void CPlayer::Stamp(void)
 						pObj->Hit(5.0f);
 					}
 				}
-
-				pEnemy = pEnemyNext;
 			}
 		}
 	}
@@ -1036,6 +1070,10 @@ void CPlayer::ManageCollision(void)
 	// 当たり判定の追従
 	if (m_info.pCollisionSphere != nullptr)
 	{
+		bool bLandMesh = false;
+		bool bLandBlock = false;
+		int nMotion = GetMotion();
+
 		D3DXVECTOR3 pos = GetPosition();
 		D3DXVECTOR3 posWaist = GetMtxPos(0);
 		D3DXVECTOR3 move = GetMove();
@@ -1053,7 +1091,7 @@ void CPlayer::ManageCollision(void)
 			m_info.pCollisionCube->SetPosition(pos);
 
 			// ブロックとの押し出し判定
-			m_info.pCollisionCube->CubeCollision(CCollision::TAG_BLOCK, &move);
+			bLandBlock = m_info.pCollisionCube->CubeCollision(CCollision::TAG_BLOCK, &move);
 
 			// メッシュフィールドとの当たり判定
 			pos = GetPosition();
@@ -1072,25 +1110,34 @@ void CPlayer::ManageCollision(void)
 
 					SetPosition(pos);
 
-					int nMotion = GetMotion();
 					bool bFinish = IsFinish();
 
-					if (nMotion == MOTION_AIR)
-					{
-						m_info.bLand = true;
-						m_fragMotion.bAir = false;
-						m_fragMotion.bJump = false;
-					}
-				}
-				else
-				{
-					m_info.bLand = false;
-
-					m_fragMotion.bAir = true;
+					bLandMesh = true;
 				}
 			}
 
 			SetMove(move);
+		}
+
+		m_info.pCollisionSphere->PushCollision(&pos, CCollision::TAG::TAG_ENEMY);
+
+		if (pos.y > 4000.0f)
+		{
+			pos.y = 4000.0f;
+		}
+
+		SetPosition(pos);
+
+		m_info.bLand = bLandMesh || bLandBlock;
+		m_fragMotion.bAir = !m_info.bLand;
+
+		if (m_info.bLand)
+		{
+			if (nMotion == MOTION_AIR)
+			{
+				m_fragMotion.bJump = false;
+				m_fragMotion.bAir = false;
+			}
 		}
 	}
 }
@@ -1103,7 +1150,44 @@ void CPlayer::ManageMotion(void)
 	int nMotion = GetMotion();
 	bool bFinish = IsFinish();
 
-	if (m_fragMotion.bStamp || nMotion == MOTION_STAMP)
+	if (nMotion == MOTION_APPER)
+	{
+		if (bFinish)
+		{
+			SetMotion(MOTION_NEUTRAL);
+
+			Camera::ChangeBehavior(new CFollowPlayer);
+
+			CUIManager *pUIManager = CUIManager::GetInstance();
+
+			if (pUIManager != nullptr)
+			{
+				pUIManager->EnableDisp(true);
+			}
+		}
+	}
+	else if (nMotion == MOTION_DEATH)
+	{
+		if (bFinish)
+		{
+			Death();
+		}
+	}
+	else if (m_fragMotion.bDodge)
+	{
+		if (nMotion != MOTION_DODGE)
+		{
+			SetMotion(MOTION_DODGE);
+		}
+		else
+		{
+			if (bFinish)
+			{
+				m_fragMotion.bDodge = false;
+			}
+		}
+	}
+	else if (m_fragMotion.bStamp || nMotion == MOTION_STAMP)
 	{// 踏みつけモーション
 		if (nMotion != MOTION_STAMP)
 		{
@@ -1155,9 +1239,12 @@ void CPlayer::ManageMotion(void)
 		{
 			if (m_fragMotion.bAddAttack)
 			{
+				Sound::Play(CSound::LABEL_SE_DASH00);
+
 				SetMotion(MOTION_MELEE2);
 				m_fragMotion.bAddAttack = false;
 				m_fragMotion.bMelee = false;
+				m_info.bMelee = false;
 
 				CEnemy *pEnemyLockon = GetLockOn();
 
@@ -1188,7 +1275,15 @@ void CPlayer::ManageMotion(void)
 	{// 近接攻撃モーション
 		if (nMotion != MOTION_ASSAULT)
 		{
+			Sound::Play(CSound::LABEL_SE_DASH00);
+
 			SetMotion(MOTION_ASSAULT);
+
+			D3DXVECTOR3 move = GetMove();
+
+			move *= 0.01f;
+
+			SetMove(move);
 		}
 		else
 		{
@@ -1292,9 +1387,11 @@ void CPlayer::ManageParam(void)
 //=====================================================
 void CPlayer::Boost(void)
 {
+	int nMotion = GetMotion();
+
 	MultiplyMtx();
 
-	if (m_info.pThruster == nullptr)
+	if (m_info.pThruster == nullptr || nMotion == MOTION_APPER)
 		return;
 
 	CInputManager *pInputManager = CInputManager::GetInstance();
@@ -1332,16 +1429,24 @@ void CPlayer::Boost(void)
 			posBoost = { mtx._41, mtx._42 ,mtx._43 };
 			vecBoost = { mtxVec._41 - posBoost.x,mtxVec._42 - posBoost.y,mtxVec._43 - posBoost.z };
 
-			CDebugProc::GetInstance()->Print("\nベクトル[%f,%f,%f]", vecBoost.x, vecBoost.y, vecBoost.z);
-
 			D3DXVECTOR3 rot = universal::VecToRot(vecBoost);
 			rot.x *= -1;
 			rot.x += D3DX_PI;
 
 			float fHeight = m_info.pThruster[i].pFire->GetHeight();
+			
+			if (!m_info.bLand)
+			{
+				fSpeed *= 0.5f;
+			}
+
+			if (pInputManager->GetPress(CInputManager::BUTTON_JUMP))
+			{
+				fSpeed = 1.0f;
+			}
 
 			float fDest = m_info.pThruster[i].size.y * fSpeed;
-
+			
 			float fDiff = fDest - fHeight;
 
 			float fFact = 0.2f;
@@ -1357,7 +1462,32 @@ void CPlayer::Boost(void)
 			m_info.pThruster[i].pFire->SetRotation(rot);
 			m_info.pThruster[i].pFire->SetPosition(posBoost);
 		}
+	}
 
+	// 武器の軌跡
+	if (nMotion == MOTION_MELEE || nMotion == MOTION_MELEE2)
+	{
+		if (m_info.pOrbitWeapon == nullptr)
+		{
+			D3DXMATRIX mtx = *GetParts(16)->pParts->GetMatrix();
+			D3DXVECTOR3 offset = { 0.0f,0.0f,-200.0f };
+
+			m_info.pOrbitWeapon = COrbit::Create(mtx, D3DXVECTOR3(0.0f, 0.0f, 0.0f), offset, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f), 30);
+		}
+
+		if (m_info.pOrbitWeapon != nullptr)
+		{
+			D3DXMATRIX mtx = *GetParts(16)->pParts->GetMatrix();
+
+			m_info.pOrbitWeapon->SetPositionOffset(mtx, 0);
+		}
+	}
+	else
+	{
+		if (m_info.pOrbitWeapon != nullptr)
+		{
+			Object::DeleteObject((CObject**)&m_info.pOrbitWeapon);
+		}
 	}
 }
 
@@ -1461,6 +1591,24 @@ void CPlayer::Event(EVENT_INFO *pEventInfo)
 
 	D3DXVECTOR3 pos = { mtxParent._41,mtxParent._42 ,mtxParent._43 };
 
+	if (nMotion == MOTION_APPER)
+	{// 出現時の煙
+		Sound::Play(CSound::LABEL_SE_LAND00);
+
+		D3DXVECTOR3 posParticle = GetPosition();
+
+		CParticle::Create(posParticle, CParticle::TYPE::TYPE_APPER_SMOKE);
+	}
+
+	if (nMotion == MOTION_DODGE)
+	{// 回避
+		D3DXMATRIX *pMtxPart = GetParts(pEventInfo->nIdxParent)->pParts->GetMatrix();
+
+		universal::SetOffSet(pMtxPart, *pMtxPart,D3DXVECTOR3(0.0f,0.0f,0.0f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f));
+
+		CInpact::Create(0.1f, pMtxPart);
+	}
+
 	if (nMotion == MOTION_SHOT)
 	{// 弾を発射
 		Shot(pos);
@@ -1500,6 +1648,7 @@ void CPlayer::Event(EVENT_INFO *pEventInfo)
 		m_info.pClsnAttack->SetPosition(pos);
 		m_info.pClsnAttack->SetRadius(RADIUS_GRAB);
 
+
 		if (m_info.pClsnAttack->OnEnter(CCollision::TAG::TAG_ENEMY))
 		{// 対象との当たり判定
 			CObject *pObj = m_info.pClsnAttack->GetOther();
@@ -1509,14 +1658,15 @@ void CPlayer::Event(EVENT_INFO *pEventInfo)
 			if (pEnemyManager != nullptr)
 			{// 敵チェック
 				// 掴む
-				CEnemy *pEnemy = pEnemyManager->GetHead();
 				CEnemy *pEnemyGrab = nullptr;
 
-				while (pEnemy != nullptr)
-				{
-					CEnemy *pEnemyNext = pEnemy->GetNext();
+				std::list<CEnemy*> listEnemy = pEnemyManager->GetListRanking();
 
-					if ((CObject*)pEnemy == pObj)
+				for (auto pEnemy : listEnemy)
+				{
+					CEnemy::TYPE type = pEnemy->GetType();
+
+					if ((CObject*)pEnemy == pObj && type != CEnemy::TYPE_BOSS)
 					{
 						pEnemyGrab = pEnemy;
 
@@ -1534,8 +1684,6 @@ void CPlayer::Event(EVENT_INFO *pEventInfo)
 
 						m_fragMotion.bGrab = false;
 					}
-
-					pEnemy = pEnemyNext;
 				}
 
 				// 掴む敵の決定
@@ -1558,6 +1706,9 @@ void CPlayer::Event(EVENT_INFO *pEventInfo)
 	{// 掴んだ敵を投げ飛ばす
 		if (m_info.pEnemyGrab != nullptr)
 		{
+			Sound::Play(CSound::LABEL_SE_IMPACT00);
+			Sound::Play(CSound::LABEL_SE_IMPACT01);
+
 			m_info.pEnemyGrab->EnableIndependent(false);
 
 			D3DXVECTOR3 offset = { 0.0f,-100.0f,0.0f };
@@ -1603,6 +1754,8 @@ void CPlayer::Event(EVENT_INFO *pEventInfo)
 //=====================================================
 void CPlayer::Shot(D3DXVECTOR3 posMazzle)
 {
+	Sound::Play(CSound::LABEL_SE_SHOT00);
+
 	D3DXVECTOR3 rot = GetRotation();
 
 	D3DXVECTOR3 move =
@@ -1612,11 +1765,52 @@ void CPlayer::Shot(D3DXVECTOR3 posMazzle)
 		sinf(rot.x - D3DX_PI * 0.5f) * cosf(rot.y) * SPEED_BULLET
 	};
 
+	CEnemyManager *pEnemymanager = CEnemyManager::GetInstance();
+
+	if (pEnemymanager != nullptr)
+	{
+		CEnemy *pEnemyLock = pEnemymanager->GetLockon();
+
+		if (pEnemyLock != nullptr)
+		{
+			D3DXVECTOR3 posEnemy = pEnemyLock->GetMtxPos(0);
+			D3DXVECTOR3 moveEnemy = pEnemyLock->GetMove();
+
+			D3DXVECTOR3 posPridiction = universal::LinePridiction(posMazzle, SPEED_BULLET, posEnemy, moveEnemy);
+
+			posPridiction +=
+			{
+				(float)universal::RandRange(RAND_SHOT, -RAND_SHOT),
+				(float)universal::RandRange(RAND_SHOT, -RAND_SHOT),
+				(float)universal::RandRange(RAND_SHOT, -RAND_SHOT),
+			};
+
+			D3DXVECTOR3 vecDiff = posEnemy - posMazzle;
+
+			universal::VecConvertLength(&vecDiff, SPEED_BULLET);
+
+			move = vecDiff;
+		}
+	}
+
 	CBullet *pBullet = CBullet::Create(posMazzle, move, 5, CBullet::TYPE_PLAYER, false, 40.0f, DAMAGE_BULLET,
 		D3DXCOLOR(1.0f, 0.6f, 0.0f, 1.0f));
 
 	// 熱量を加算
-	m_info.aParam[PARAM_GUN] += 0.3f;
+	m_info.aParam[PARAM_GUN] += 0.1f;
+
+	// エフェクト発生
+	CAnimEffect3D *pAnimManager = CAnimEffect3D::GetInstance();
+
+	if (pAnimManager != nullptr)
+	{
+		CAnim3D *pAnim = pAnimManager->CreateEffect(posMazzle, CAnimEffect3D::TYPE_MUZZLEFLUSH);
+
+		if (pAnim != nullptr)
+		{
+			pAnim->EnableZtest(false);
+		}
+	}
 }
 
 //=====================================================
@@ -1636,8 +1830,24 @@ void CPlayer::ManageAttack(D3DXVECTOR3 pos, float fRadius)
 	{// 対象との当たり判定
 		CObject *pObj = m_info.pClsnAttack->GetOther();
 
-		if (pObj != nullptr)
+		if (pObj != nullptr && !m_info.bMelee)
 		{
+			Sound::Play(CSound::LABEL_SE_HIT01);
+
+			// ダメージエフェクトの生成
+			CAnimEffect3D *pAnim3D = CAnimEffect3D::GetInstance();
+
+			if (pAnim3D != nullptr)
+			{
+				CAnim3D *pEffect = pAnim3D->CreateEffect(pos, CAnimEffect3D::TYPE::TYPE_HIT00);
+
+				if (pEffect != nullptr)
+				{
+					pEffect->SetSize(300.0f, 300.0f);
+					pEffect->EnableZtest(true);
+				}
+			}
+
 			// ヒットストップ
 			CSlow *pSlow = CSlow::GetInstance();
 
@@ -1654,8 +1864,10 @@ void CPlayer::ManageAttack(D3DXVECTOR3 pos, float fRadius)
 				pCamera->SetQuake(1.01f, 1.01f, 10);
 			}
 
-			m_info.pClsnAttack->DamageAll(CCollision::TAG::TAG_ENEMY, 5.0f);
+			m_info.pClsnAttack->DamageAll(CCollision::TAG::TAG_ENEMY, 7.5f);
 		}
+
+		m_info.bMelee = true;
 	}
 }
 
@@ -1682,13 +1894,13 @@ void CPlayer::Hit(float fDamage)
 
 		if (m_info.fLife <= 0.0f)
 		{// 死亡判定
+			Sound::Play(CSound::LABEL_SE_WARNING00);
+
 			m_info.fLife = 0.0f;
 
 			m_info.state = STATE_DEATH;
 
-			Uninit();
-
-			CGame::SetState(CGame::STATE::STATE_END);
+			SetMotion(MOTION::MOTION_DEATH);
 		}
 		else
 		{// ダメージ判定
@@ -1738,14 +1950,25 @@ CEnemy *CPlayer::GetLockOn(void)
 //=====================================================
 void CPlayer::EndMelee(void)
 {
-	Camera::ChangeBehavior(new CFollowPlayer);
+	if (m_info.pOrbitWeapon != nullptr)
+	{
+		D3DXMATRIX mtx = *GetParts(16)->pParts->GetMatrix();
+
+		m_info.pOrbitWeapon->SetEnd(true);
+
+		m_info.pOrbitWeapon = nullptr;
+	}
+
+	Camera::ChangeBehavior(new CLookEnemy);
 
 	CEnemyManager *pEnemyManager = CEnemyManager::GetInstance();
 
 	if (pEnemyManager != nullptr)
 	{
-
+		pEnemyManager->EnableLockTarget(false);
 	}
+
+	m_info.bMelee = false;
 }
 
 //=====================================================
@@ -1834,6 +2057,43 @@ void CPlayer::AddMoveStamp(void)
 }
 
 //=====================================================
+// 死亡処理
+//=====================================================
+void CPlayer::Death(void)
+{
+	CSound *pSound = CSound::GetInstance();
+
+	if (pSound != nullptr)
+	{
+		pSound->Stop(CSound::LABEL_SE_WARNING00);
+	}
+
+	Sound::Play(CSound::LABEL_SE_EXPLOSION01);
+
+	D3DXVECTOR3 pos = GetMtxPos(0);
+
+	// エフェクト発生
+	CAnimEffect3D *pAnimManager = CAnimEffect3D::GetInstance();
+
+	if (pAnimManager != nullptr)
+	{
+		CAnim3D *pAnim = pAnimManager->CreateEffect(pos, CAnimEffect3D::TYPE_EXPLOSION);
+
+		if (pAnim != nullptr)
+		{
+			pAnim->SetSize(600.0f, 600.0f);
+		}
+	}
+
+	// 破片生成
+	CDebrisSpawner::Create(pos, CDebrisSpawner::TYPE::TYPE_DEATH);
+	
+	Uninit();
+
+	CContinue::Create();
+}
+
+//=====================================================
 // デバッグ表示
 //=====================================================
 void CPlayer::Debug(void)
@@ -1863,4 +2123,16 @@ void CPlayer::Debug(void)
 
 	pDebugProc->Print("\nモーション[%d]", nMotion);
 	pDebugProc->Print("\nターゲットロック[%d]", m_info.bLockTarget);
+	pDebugProc->Print("\n着地[%d]", m_info.bLand);
+	pDebugProc->Print("\n空中[%d]", m_fragMotion.bAir);
+
+	CInputKeyboard *pKey = CInputKeyboard::GetInstance();
+
+	if (pKey != nullptr)
+	{
+		if (pKey->GetTrigger(DIK_O))
+		{
+			m_info.fLife = 1.0f;
+		}
+	}
 }

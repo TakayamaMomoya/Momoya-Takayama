@@ -27,6 +27,7 @@ public:
 	void Uninit(void);
 	void Update(void);
 	void Draw(void);
+	void RandStart(void);	// アニメーションのスタートをランダムにする処理
 
 private:
 	void SetAnim(int nAnim, int nNumAnim);

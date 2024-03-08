@@ -28,7 +28,7 @@ public:
 		MODE_MAX
 	};
 
-	CObject3D(int nPriority = 6);	// コンストラクタ
+	CObject3D(int nPriority = 5);	// コンストラクタ
 	~CObject3D();	// デストラクタ
 
 	HRESULT Init(void);
@@ -49,6 +49,7 @@ public:
 	D3DXCOLOR GetColor(void) { return m_col; }
 	void SetColor(D3DXCOLOR col);
 	void SetTex(D3DXVECTOR2 rd, D3DXVECTOR2 lu);
+	void SetFactSB(float fFact) { m_fFactSB = fFact; }
 	void SetVtx(void);
 	void SetMode(MODE mode);
 	MODE GetMode(void) { return m_mode; }
@@ -68,6 +69,7 @@ private:
 	D3DXCOLOR m_col;	// 色
 	float m_width;	// 幅
 	float m_heigth;	// 高さ
+	float m_fFactSB;	// ストレッチビルボードのときの見やすさの補正
 	int m_nIdxTexture;	// テクスチャの番号
 	MODE m_mode;	// モード
 };

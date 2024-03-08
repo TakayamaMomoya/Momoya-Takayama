@@ -21,6 +21,7 @@
 #include "enemyManager.h"
 #include "enemy.h"
 #include "effect3D.h"
+#include "meshfield.h"
 
 //*****************************************************
 // マクロ定義
@@ -32,6 +33,7 @@
 #define INITIAL_ANGLE	(45.0f)	// 初期の視野角
 #define ANGLE_GAME	(D3DX_PI * 0.4f)	// ゲーム中のカメラの角度
 #define RATE_CAMERA_MOVE	(1.5f)	// カメラがどれだけプレイヤーの先を見るかの倍率
+#define HEIGHT_CAMERA (20.0f)	// カメラの高さ
 
 //====================================================
 // 初期化処理
@@ -96,6 +98,22 @@ void CCamera::Update(void)
 //====================================================
 void CCamera::MoveDist(float fFact)
 {
+	// メッシュフィールドとの当たり判定
+	CMeshField *pMesh = CMeshField::GetInstance();
+
+	if(pMesh)
+	{
+		float fHeight = pMesh->GetHeight(m_camera.posVDest, nullptr);
+
+		fHeight += HEIGHT_CAMERA;
+
+		if (fHeight > m_camera.posVDest.y)
+		{
+			// 位置補正
+			m_camera.posVDest.y = fHeight;
+		}
+	}
+
 	// 目標位置に補正
 	m_camera.posV += (m_camera.posVDest - m_camera.posV) * fFact;
 	m_camera.posR += (m_camera.posRDest - m_camera.posR) * fFact;
@@ -309,11 +327,11 @@ void CCamera::SetCamera(void)
 	pDevice->SetTransform(D3DTS_VIEW, &m_camera.mtxView);
 
 #ifdef _DEBUG
-	//CDebugProc::GetInstance()->Print("\n視点の位置：[%f,%f,%f]", m_camera.posV.x, m_camera.posV.y, m_camera.posV.z);
+	CDebugProc::GetInstance()->Print("\n視点の位置：[%f,%f,%f]", m_camera.posV.x, m_camera.posV.y, m_camera.posV.z);
 	//CDebugProc::GetInstance()->Print("\n視点の目標位置：[%f,%f,%f]", m_camera.posVDest.x, m_camera.posVDest.y, m_camera.posVDest.z);
-	//CDebugProc::GetInstance()->Print("\n注視点の位置：[%f,%f,%f]", m_camera.posR.x, m_camera.posR.y, m_camera.posR.z);
+	CDebugProc::GetInstance()->Print("\n注視点の位置：[%f,%f,%f]", m_camera.posR.x, m_camera.posR.y, m_camera.posR.z);
 	//CDebugProc::GetInstance()->Print("\n注視点の目標位置：[%f,%f,%f]", m_camera.posRDest.x, m_camera.posRDest.y, m_camera.posRDest.z);
-	//CDebugProc::GetInstance()->Print("\nカメラの向き：[%f,%f,%f]", m_camera.rot.x, m_camera.rot.y, m_camera.rot.z);
+	CDebugProc::GetInstance()->Print("\nカメラの向き：[%f,%f,%f]", m_camera.rot.x, m_camera.rot.y, m_camera.rot.z);
 	//CDebugProc::GetInstance()->Print("\nカメラ距離：[%f]", m_camera.fLength);
 #endif
 }

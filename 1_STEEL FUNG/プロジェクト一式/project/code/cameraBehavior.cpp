@@ -15,6 +15,7 @@
 #include "effect3D.h"
 #include "inputmouse.h"
 #include "inputkeyboard.h"
+#include "debugproc.h"
 
 //*****************************************************
 // 定数定義
@@ -25,6 +26,27 @@ const float DIST_CYLINDER = 1000.0f;
 const float DIST_LOOK = 1500.0f;
 const float MOVE_SPEED = 3.0f;						//移動スピード
 const float ROLL_SPEED = 0.02f;						//回転スピード
+}
+
+//=====================================================
+// 出現時のカメラの動き
+//=====================================================
+void CApperPlayer::Update(CCamera *pCamera)
+{
+	CPlayer *pPlayer = CPlayer::GetInstance();
+
+	if (pPlayer == nullptr)
+		return;
+
+	D3DXVECTOR3 posPlayer = pPlayer->GetMtxPos(1);
+
+	CCamera::Camera *pInfoCamera = pCamera->GetCamera();
+
+	pInfoCamera->posRDest = posPlayer;
+
+	pInfoCamera->posV = posPlayer;
+	pInfoCamera->posV.y = 10.0f;
+	pInfoCamera->posV.x += 100.0f;
 }
 
 //=====================================================
@@ -66,6 +88,8 @@ void CFollowPlayer::Update(CCamera *pCamera)
 
 #ifdef _DEBUG
 	CEffect3D::Create(pInfoCamera->posRDest, 20.0f, 1, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+
+	CDebugProc::GetInstance()->Print("\nカメラはプレイヤー追従です");
 #endif
 }
 
@@ -92,48 +116,78 @@ void CLookEnemy::Update(CCamera *pCamera)
 	if (pEnemyLock != nullptr)
 	{
 		posEnemy = pEnemyLock->GetMtxPos(0);
+
+		// 位置の差分を取得
+		D3DXVECTOR3 posPlayer = pPlayer->GetMtxPos(2);
+		D3DXVECTOR3 vecDiff = posEnemy - posPlayer;
+		D3DXVECTOR3 vecDiffFlat = { vecDiff.x,0.0f,vecDiff.z };
+		D3DXVECTOR3 rotDest;
+		D3DXVECTOR3 *pRot = &pInfoCamera->rot;
+
+		// 差分の向きを計算
+		float fLegnthDiff = D3DXVec3Length(&vecDiff);
+		float fLegnthFlat = D3DXVec3Length(&vecDiffFlat);
+
+		rotDest.x = atan2f(fLegnthFlat, vecDiff.y) + D3DX_PI * 0.01f;
+		rotDest.y = atan2f(vecDiff.x, vecDiff.z);
+
+		float fLengthView = pInfoCamera->fLength;
+
+		// 注視点位置の設定
+		pInfoCamera->posRDest = posPlayer + vecDiff * 0.5f;
+
+		if (fLegnthDiff > 7000.0f)
+		{// 敵が遠いときの制限
+			posPlayer = pPlayer->GetMtxPos(0);
+
+			fLengthView = pInfoCamera->fLength * 0.4f;
+
+			pInfoCamera->posRDest.y -= fLegnthDiff * 0.1f;
+
+			rotDest.x += 0.3f;
+		}
+
+		universal::FactingRot(&pRot->x, rotDest.x, 0.1f);
+		universal::FactingRot(&pRot->y, rotDest.y, 0.1f);
+
+		CDebugProc::GetInstance()->Print("\n距離[%f]", fLegnthDiff);
+
+		// 視点位置の設定
+		pInfoCamera->posVDest =
+		{
+			posPlayer.x - sinf(pRot->x) * sinf(pRot->y) * fLengthView,
+			posPlayer.y - cosf(pRot->x) * fLengthView,
+			posPlayer.z - sinf(pRot->x) * cosf(pRot->y) * fLengthView
+		};
+
+		//universal::LimitDistSphereInSide(1000.0f, &pInfoCamera->posVDest, posPlayer);
+
+		float fDiff = universal::LimitDistCylinder(1000.0f, &pInfoCamera->posV, posEnemy);
+
+		if (fDiff < 1000.0f)
+		{// カメラ距離が制限されてる時カメラ向きを設定
+			D3DXVECTOR3 vecDiffCamera = pInfoCamera->posR - pInfoCamera->posV;
+
+			float fLengthCameraFlat = sqrtf(vecDiffCamera.x * vecDiffCamera.x + vecDiffCamera.z * vecDiffCamera.z);
+
+			rotDest.x = atan2f(fLengthCameraFlat, vecDiffCamera.y);
+			rotDest.y = atan2f(vecDiffCamera.x, vecDiffCamera.z);
+		}
 	}
 
-	// 位置の差分を取得
-	D3DXVECTOR3 posPlayer = pPlayer->GetMtxPos(2);
-	D3DXVECTOR3 vecDiff = posEnemy - posPlayer;
-	D3DXVECTOR3 vecDiffFlat = { vecDiff.x,0.0f,vecDiff.z };
-
-	// 差分の向きを計算
-	D3DXVECTOR3 rot;
-	float fLegnthDiff = D3DXVec3Length(&vecDiff);
-	float fLegnthFlat = D3DXVec3Length(&vecDiffFlat);
-
-	rot.x = atan2f(fLegnthFlat, vecDiff.y) + D3DX_PI * 0.01f;
-	rot.y = atan2f(vecDiff.x, vecDiff.z);
-
-	// 注視点位置の設定
-	pInfoCamera->posRDest = posPlayer + vecDiff * 0.5f;
-
-	float fLengthView = fLegnthDiff + pInfoCamera->fLength;
-
-	// 視点位置の設定
-	pInfoCamera->posVDest =
-	{
-		posEnemy.x - sinf(rot.x) * sinf(rot.y) * fLengthView,
-		posEnemy.y - cosf(rot.x) * fLengthView,
-		posEnemy.z - sinf(rot.x) * cosf(rot.y) * fLengthView
-	};
-
-	universal::LimitDistCylinder(1000.0f, &pInfoCamera->posV, pPlayer->GetPosition());
-
-	pInfoCamera->rot = rot;
-
 	bool bLock = pPlayer->IsTargetLock();
+
+#ifdef _DEBUG
+	CEffect3D::Create(pInfoCamera->posRDest, 20.0f, 1, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+
+	CDebugProc::GetInstance()->Print("\nカメラはロックオン状態です");
+#endif
 
 	if (pEnemyLock == nullptr || bLock== false)
 	{// 通常の注視
 		pCamera->ChangeBehavior(new CFollowPlayer);
-	}
 
-	if (fLegnthFlat < DIST_CYLINDER)
-	{// シリンダー状の注視に移行
-		//Camera::ChangeBehavior(new CMoveCylinder);
+		return;
 	}
 }
 
@@ -198,12 +252,12 @@ void CMoveCylinder::Update(CCamera *pCamera)
 
 	if (pEnemyLock == nullptr || bLock == false)
 	{// プレイヤー追従に移行
-		//pCamera->ChangeBehavior(new CFollowPlayer);
+		Camera::ChangeBehavior(new CLookEnemy);
 	}
 
 	if (fLegnthFlat > DIST_LOOK)
 	{// 普通の注視に移行
-		//Camera::ChangeBehavior(new CLookEnemy);
+		Camera::ChangeBehavior(new CLookEnemy);
 	}
 }
 

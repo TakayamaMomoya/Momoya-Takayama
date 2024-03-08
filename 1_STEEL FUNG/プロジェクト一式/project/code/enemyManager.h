@@ -13,11 +13,14 @@
 //*****************************************************
 #include "object.h"
 #include "enemy.h"
+#include <iostream>
+#include <list>
 
 //*****************************************************
 // 前方宣言
 //*****************************************************
 class CUI;
+class CFan2D;
 
 //*****************************************************
 // 定数定義
@@ -30,6 +33,7 @@ const char* PATH_BODY_ENEMY[CEnemy::TYPE::TYPE_MAX] =
 		"data\\MOTION\\motionHeli.txt",
 		"data\\MOTION\\motionBomb.txt",
 		"data\\MOTION\\motionDrone01.txt",
+		"data\\MOTION\\motionHeli.txt",
 		"data\\MOTION\\motionArms00.txt",
 };
 }
@@ -58,17 +62,20 @@ public:
 	void DeleteAll(void);
 	void SetEnemyLock(CEnemy *pEnemy) { m_pEnemyLockon = pEnemy; }
 	void SpawnGroup(int nIdx);
-	CEnemy *GetHead(void) { return m_pHead; }
-	CEnemy *GetTail(void) { return m_pTail; }
-	void SetHead(CEnemy *pEnemy) { m_pHead = pEnemy; }
-	void SetTail(CEnemy *pEnemy) { m_pTail = pEnemy; }
+	bool IsEndSpawn(void) { return m_bEndSpawn; }
+	void EnableEndSpawn(bool bEnd) { m_bEndSpawn = bEnd; }
+	std::list<CEnemy*> GetListRanking(void) { return m_list; }
+	void AddToList(CEnemy *pEnemy);
+	void RemoveFromList(CEnemy *pEnemy);
 	static CEnemyManager *GetInstance(void) { return m_pEnemyManager; }
 
 private:
 	struct SInfoEnemy
 	{// 敵の配置情報
 		D3DXVECTOR3 pos;	// 位置
+		D3DXVECTOR3 posDestInitial;	// 初期目標位置
 		int nType;	// 種類
+		float fDelaySpawn;	// スポーンディレイ
 	};
 	struct SInfoEnemyGroup
 	{// 敵集団の情報
@@ -77,14 +84,22 @@ private:
 	};
 
 	void Load(void);
+	void CreateGauge(void);
+	void DeleteGauge(void);
+	void ControlGauge(void);
 
+	std::list<CEnemy*> m_list;	// 一覧リスト
 	SInfoEnemyGroup *m_pInfoGroup;	// 敵集団の情報
 	CEnemy *m_pEnemyLockon;	// ロックオンしてる敵
 	bool m_bLockTarget;	// ターゲットをロックしているかどうか
-	float m_fTimer;	// スポーンタイマー
 	CUI *m_pCursor;	// ロックオンカーソル
-	CEnemy *m_pHead;	// 先頭のアドレス
-	CEnemy *m_pTail;	// 最後尾のアドレス
+	CUI *m_pIsLock;	// ロックしてるかの表示
+	CFan2D *m_pObjectGauge;	// ゲージのポインタ
+	CFan2D *m_pObjectFrame;	// フレームのポインタ
+	bool m_bEndSpawn;	// スポーン終了フラグ
+	float m_fTimerSpawn;	// スポーンタイマー
+	int m_nCntSpawn;	// スポーンカウンター
+	float m_fTimerChange;	// ロック替えタイマー
 
 	static CEnemyManager *m_pEnemyManager;	// 自身のポインタ
 };

@@ -15,6 +15,7 @@
 #include "bullet.h"
 #include "manager.h"
 #include "slow.h"
+#include "sound.h"
 
 //*****************************************************
 // ’è”’è‹`
@@ -23,10 +24,10 @@ namespace
 {
 const float DIST_FIRE = 500.0f;	// ”­ŽË‚·‚é‚Ü‚Å‚ÌŽ‹ü‚ÆƒvƒŒƒCƒ„[‚Ì·•ª‹——£
 const float SPEED_BULLET = 150.0f;	// ’e‚Ì‘¬“x
-const float TIME_FIRE = 0.1f;	// ”­ŽËŠÔŠu
+const float TIME_FIRE = 0.5f;	// ”­ŽËŠÔŠu
 const float DIST_KEEP = 3000.0f;	// í“¬Žž‚É•Û‚Â‹——£
 const float SPEED_MOVE = 0.4f;	// ˆÚ“®‘¬“x
-const int ACCURACY = 100;	// ¸“x
+const int ACCURACY = 500;	// ¸“x
 }
 
 //=====================================================
@@ -162,6 +163,8 @@ void CEnemyNormal::Attack(void)
 
 			if (m_fTimeFire > TIME_FIRE)
 			{// ’e‚Ì”­ŽË
+				Sound::Play(CSound::LABEL_SE_SHOT01);
+
 				D3DXVECTOR3 posMazzle = GetMtxPos(0);
 				D3DXVECTOR3 moveBullet;
 				D3DXVECTOR3 movePlayer = pPlayer->GetMove();
@@ -177,7 +180,7 @@ void CEnemyNormal::Attack(void)
 
 				moveBullet = vecDiffBullet * SPEED_BULLET;
 
-				CBullet::Create(posMazzle, -moveBullet, 5, CBullet::TYPE::TYPE_ENEMY, false, 50.0f, 0.01f);
+				CBullet::Create(posMazzle, -moveBullet, 5, CBullet::TYPE::TYPE_ENEMY, false, 50.0f, 0.25f);
 
 				m_fTimeFire = 0;
 			}
@@ -223,7 +226,7 @@ void CEnemyNormal::KeepDistance(void)
 		SetMove(move);
 
 #ifdef _DEBUG
-		CEffect3D::Create(posDest, 20.0f, 10, D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+		CEffect3D::Create(posDest, 20.0f, 10, D3DXCOLOR(1.0f, 0.0f, 0.0f, 0.01f));
 #endif
 
 	}

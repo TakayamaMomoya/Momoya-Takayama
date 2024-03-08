@@ -8,17 +8,22 @@
 #ifndef _SAVEDATAMANAGER_H_
 #define _SAVEDATAMANAGER_H_
 
-//*****************************************************
-// インクルード
-//*****************************************************
-#include "object.h"
+#include "main.h"
 
 //*****************************************************
 // クラスの定義
 //*****************************************************
-class CSaveDataManager : public CObject
+class CSaveDataManager
 {
 public:
+	struct SInfo
+	{
+		int nProgress;	// 進行状況
+		float fInitialLife;	// 初期体力
+		float fLife;	// 体力
+		int nAddReward;	// 加算報酬
+	};
+
 	CSaveDataManager();	// コンストラクタ
 	~CSaveDataManager();	// デストラクタ
 
@@ -26,14 +31,13 @@ public:
 	static CSaveDataManager *GetInstance(void) { return m_pSaveDataManager; }
 	HRESULT Init(void);
 	void Uninit(void);
-	void Update(void);
-	void Draw(void);
+	int GetProgress(void) { return m_info.nProgress; }
+	SInfo *GetInfo(void) { return &m_info; }
+	void Save(void);
+	void Load(void);
 
 private:
-	void Load(void);
-	void Save(void);
-
-	int m_nProgress;	// 現在の進行状況
+	SInfo m_info;
 
 	static CSaveDataManager *m_pSaveDataManager;	// 自身のポインタ
 };

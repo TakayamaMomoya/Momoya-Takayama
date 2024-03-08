@@ -1,0 +1,18 @@
+#====================================================================
+#
+# ランキング[ranking.txt]
+# Author：Momoya Takayama
+#
+#====================================================================
+
+PLAYER
+	RANK  1
+	REWARD 90000
+	NAME momoya
+END_PLAYER
+
+PLAYER
+	RANK 2
+	REWARD 85000
+	NAME takuya
+END_PLAYER

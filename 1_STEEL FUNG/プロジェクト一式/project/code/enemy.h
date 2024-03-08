@@ -30,6 +30,7 @@ public:
 		TYPE_NORMAL,	// 通常敵
 		TYPE_BOMB,	// 爆弾敵
 		TYPE_DRONE,	// ドローン敵
+		TYPE_TUTORIAL,	// チュートリアル敵
 		TYPE_BOSS,		// ボス敵
 		TYPE_MAX
 	};
@@ -60,18 +61,19 @@ public:
 	void Update(void);
 	void Draw(void);
 	static int GetNumAll(void) { return m_nNumAll; }
-	void SetLife(float fLife);
+	void SetLife(float fLife,bool bInit = false);
 	float GetLife(void) { return m_info.fLife; }
+	float GetLifeInitial(void) { return m_info.fLifeInitial; }
 	void Hit(float fDamage);
 	void SetSpherePosition(D3DXVECTOR3 pos);
 	STATE GetState(void) { return m_info.state; }
 	void SetState(STATE state) { m_info.state = state; }
 	CCollisionSphere *GetClsnSphere(void) { return m_info.pCollisionSphere; }
-	CEnemy *GetNext(void) { return m_pNext; }
 	int GetCntState(void) { return m_info.nTimerState; }
 	void SetCntState(int nCnt) { m_info.nTimerState = nCnt; }
 	float GetSpeed(void) { return m_info.fMoveSpeed; }
 	void SetMoveSpeed(float fSpeed) { m_info.fMoveSpeed = fSpeed; }
+	void SetMoveState(MOVESTATE state) { m_info.moveState = state; }
 	MOVESTATE GetMoveState(void) { return m_info.moveState; }
 	void SetPosDest(D3DXVECTOR3 pos) { m_info.posDest = pos; }
 	void CreateCollision(float fRadius = 90.0f);
@@ -84,6 +86,9 @@ public:
 	float GetDistLock(void) { return m_info.fDistLock; }
 	bool IsStamp(void) { return m_info.bStamp; }
 	void EnableStamp(bool bStamp) { m_info.bStamp = bStamp; }
+	void SetMovefact(float fFact) { m_info.fFactMove = fFact; }
+	void SetType(TYPE type) { m_info.type = type; }
+	TYPE GetType(void) { return m_info.type; }
 
 protected:
 	void ManageScore(void);
@@ -99,6 +104,7 @@ private:
 	struct SInfo
 	{
 		float fLife;	// 体力
+		float fLifeInitial;	// 初期体力
 		float fMoveSpeed;	// 移動速度
 		int nTimerState;	// 状態遷移カウンター
 		float fCntAttack;	// 攻撃タイマー
@@ -112,6 +118,8 @@ private:
 		float fDistLock;	// ロック可能距離
 		float aDistMoveState[MOVESTATE_MAX];	// 移動状態がかわる距離
 		bool bStamp;	// 踏めるかどうか
+		float fFactMove;	// 移動減衰係数
+		TYPE type;	// 種類
 	};
 	void ManageState(void);
 	void ManageMoveState(void);
@@ -121,9 +129,6 @@ private:
 
 	static int m_nNumAll;	// 総数
 	SInfo m_info;	// 情報
-
-	CEnemy *m_pPrev;	// 前のアドレス
-	CEnemy *m_pNext;	// 次のアドレス
 };
 
 #endif

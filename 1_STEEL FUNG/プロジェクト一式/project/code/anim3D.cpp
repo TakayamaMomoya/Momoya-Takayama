@@ -175,3 +175,11 @@ void CAnim3D::SetAnim(int nAnim, int nNumAnim)
 		pVtxBuff->Unlock();
 	}
 }
+
+//=====================================================
+// アニメーション開始フレームをランダムで決める
+//=====================================================
+void CAnim3D::RandStart(void)
+{
+	m_nCounterAnim = universal::RandRange(m_nNumAnim - 1, 0);
+}

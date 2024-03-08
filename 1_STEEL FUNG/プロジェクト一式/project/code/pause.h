@@ -37,7 +37,8 @@ public:
 private:
 	enum MENU
 	{// 項目の種類
-		MENU_RESUME = 0,	// 再開
+		MENU_RETRY_FROM_CHECKPOINT = 0,	// チェックポイントから再開
+		MENU_RESUME,	// 再開
 		MENU_RESTART,	// リトライ
 		MENU_QUIT,	// 終了
 		MENU_MAX

@@ -69,22 +69,22 @@ HRESULT CBoostEffect::Init(void)
 	m_info.fHeight = 400.0f;
 	m_info.col = { 1.0f,1.0f,1.0f,1.0f };
 
-	if (m_info.pBlade == nullptr)
-	{// ブレード部分の生成
+	if (m_info.pBoost == nullptr)
+	{
 		CAnimEffect3D *pAnim3D = CAnimEffect3D::GetInstance();
 
 		if(pAnim3D != nullptr)
-			m_info.pBlade = pAnim3D->CreateEffect(D3DXVECTOR3(0.0f,0.0f,0.0f),CAnimEffect3D::TYPE::TYPE_BOOST);
+			m_info.pBoost = pAnim3D->CreateEffect(D3DXVECTOR3(0.0f,0.0f,0.0f),CAnimEffect3D::TYPE::TYPE_BOOST);
 
-		if (m_info.pBlade != nullptr)
+		if (m_info.pBoost != nullptr)
 		{
-			m_info.pBlade->SetMode(CObject3D::MODE::MODE_STRETCHBILLBOARD);
-			m_info.pBlade->SetRotation(D3DXVECTOR3(-1.57f, 0.0f, 0.0f));
-			m_info.pBlade->SetSize(m_info.fRadius, m_info.fHeight);
-			m_info.pBlade->SetPosition(D3DXVECTOR3(0.0f, m_info.fHeight, 0.0f));
-			m_info.pBlade->EnableAdd(true);
-			m_info.pBlade->EnableZtest(false);
-			m_info.pBlade->SetAlphaTest(100);
+			m_info.pBoost->SetMode(CObject3D::MODE::MODE_STRETCHBILLBOARD);
+			m_info.pBoost->SetRotation(D3DXVECTOR3(-1.57f, 0.0f, 0.0f));
+			m_info.pBoost->SetSize(m_info.fRadius, m_info.fHeight);
+			m_info.pBoost->SetPosition(D3DXVECTOR3(0.0f, m_info.fHeight, 0.0f));
+			m_info.pBoost->EnableAdd(true);
+			m_info.pBoost->EnableZtest(false);
+			m_info.pBoost->SetAlphaTest(100);
 		}
 	}
 
@@ -96,10 +96,10 @@ HRESULT CBoostEffect::Init(void)
 //=====================================================
 void CBoostEffect::Uninit(void)
 {
-	if (m_info.pBlade != nullptr)
+	if (m_info.pBoost != nullptr)
 	{
-		m_info.pBlade->Uninit();
-		m_info.pBlade = nullptr;
+		m_info.pBoost->Uninit();
+		m_info.pBoost = nullptr;
 	}
 
 	Release();
@@ -114,7 +114,7 @@ void CBoostEffect::Update(void)
 	D3DXVECTOR3 pos = GetPosition();
 	D3DXVECTOR3 rot = GetRotation();
 
-	if (m_info.pBlade != nullptr)
+	if (m_info.pBoost != nullptr)
 	{
 		pos +=
 		{
@@ -125,8 +125,8 @@ void CBoostEffect::Update(void)
 
 		rot.x -= 1.57f;
 
-		m_info.pBlade->SetPosition(pos);
-		m_info.pBlade->SetRotation(rot);
+		m_info.pBoost->SetPosition(pos);
+		m_info.pBoost->SetRotation(rot);
 	}
 }
 
@@ -143,12 +143,12 @@ void CBoostEffect::SetRadius(float fRadius)
 {
 	m_info.fRadius = fRadius;
 
-	if (m_info.pBlade != nullptr)
+	if (m_info.pBoost != nullptr)
 	{
-		float fHeight = m_info.pBlade->GetHeight();
+		float fHeight = m_info.pBoost->GetHeight();
 
-		m_info.pBlade->SetSize(fRadius, fHeight);
-		m_info.pBlade->SetVtx();
+		m_info.pBoost->SetSize(fRadius, fHeight);
+		m_info.pBoost->SetVtx();
 	}
 }
 
@@ -157,11 +157,11 @@ void CBoostEffect::SetHeight(float fHeight)
 {
 	m_info.fHeight = fHeight;
 
-	if (m_info.pBlade != nullptr)
+	if (m_info.pBoost != nullptr)
 	{
-		float fWidth = m_info.pBlade->GetWidth();
+		float fWidth = m_info.pBoost->GetWidth();
 
-		m_info.pBlade->SetSize(fWidth, fHeight);
+		m_info.pBoost->SetSize(fWidth, fHeight);
 	}
 }
 
@@ -170,9 +170,9 @@ void CBoostEffect::SetColor(D3DXCOLOR col)
 {
 	m_info.col = col;
 	
-	if (m_info.pBlade != nullptr)
+	if (m_info.pBoost != nullptr)
 	{
-		m_info.pBlade->SetColor(col);
+		m_info.pBoost->SetColor(col);
 	}
 }
 
@@ -183,7 +183,7 @@ void CBoostEffect::SetPosition(D3DXVECTOR3 pos)
 
 	D3DXVECTOR3 rot = GetRotation();
 
-	if (m_info.pBlade != nullptr)
+	if (m_info.pBoost != nullptr)
 	{
 		pos +=
 		{
@@ -194,7 +194,16 @@ void CBoostEffect::SetPosition(D3DXVECTOR3 pos)
 
 		rot.x -= 1.57f;
 
-		m_info.pBlade->SetPosition(pos);
-		m_info.pBlade->SetRotation(rot);
+		m_info.pBoost->SetPosition(pos);
+		m_info.pBoost->SetRotation(rot);
+	}
+}
+
+// Zテストをするかどうか
+void CBoostEffect::EnableZtestBoost(bool bZtest)
+{
+	if (m_info.pBoost != nullptr)
+	{
+		m_info.pBoost->EnableZtest(bZtest);
 	}
 }

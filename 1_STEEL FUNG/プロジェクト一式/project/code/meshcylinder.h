@@ -32,7 +32,7 @@ const float MESH_HEIGHT = 50.0f;	// メッシュの高さ
 class CMeshCylinder : public CObject
 {
 public:
-	CMeshCylinder(int nPriority = 6);	// コンストラクタ
+	CMeshCylinder(int nPriority = 5);	// コンストラクタ
 	~CMeshCylinder();	// デストラクタ
 
 	typedef struct

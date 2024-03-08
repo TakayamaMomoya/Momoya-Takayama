@@ -42,11 +42,12 @@ public:
 	void SetColor(D3DXCOLOR col);
 	float GetRadius(void) { return m_info.fRadius; }
 	float GetHeight(void) { return m_info.fHeight; }
+	void EnableZtestBoost(bool bZtest);
 
 private:
 	struct SInfo
 	{
-		CAnim3D *pBlade;
+		CAnim3D *pBoost;
 		D3DXVECTOR3 pos;
 		D3DXVECTOR3 rot;
 		D3DXCOLOR col;

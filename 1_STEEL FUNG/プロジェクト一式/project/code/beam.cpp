@@ -81,6 +81,7 @@ HRESULT CBeam::Init(void)
 			{
 				m_info.pAnim->EnableZtest(false);
 				m_info.pAnim->SetMode(CObject3D::MODE::MODE_STRETCHBILLBOARD);
+				m_info.pAnim->SetFactSB(40.0f);
 			}
 		}
 	}

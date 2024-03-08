@@ -17,6 +17,7 @@
 #include "slow.h"
 #include "animEffect3D.h"
 #include "anim3D.h"
+#include "sound.h"
 
 //*****************************************************
 // ’è”’è‹`
@@ -94,6 +95,8 @@ void CEnemyBomb::Death(void)
 
 	if (pCollision != nullptr)
 	{// ŽüˆÍ‚Ì“G‚Éƒ_ƒ[ƒW‚ð—^‚¦‚é
+		Sound::Play(CSound::LABEL_SE_EXPLOSION01);
+
 		pCollision->SetRadius(RADIUS_EXPLOSION);
 		pCollision->DamageAll(CCollision::TAG_ENEMY, 15.0f);
 
